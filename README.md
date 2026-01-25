@@ -21,7 +21,7 @@ Each project is contained within its own directory and includes independent docu
 1. **Clone the repository**
 
 ```powershell
-git clone https://github.com/your-username/python-mini-projects.git
+git clone https://github.com/your-OzenFern/python-mini-projects.git
 cd python-mini-projects
 ```
 
