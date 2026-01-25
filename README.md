@@ -32,9 +32,12 @@ cd python-mini-projects
 cd caesar-cipher
 python main.py
 ```
+## 📜 License
+
+Distributed under the [MIT License](LICENSE).
 
 ## 📝 Notes
 
 - This is a learning repository, not production-ready code.
-- Projects focus on Python fundamentals
+- Projects focus on Python fundamentals.
 - Contributions are welcome for improvements or learning purposes.
