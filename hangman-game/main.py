@@ -26,7 +26,7 @@ while new_game:
         hangman.display_all(lives, blanks)
         result = hangman.decide_result(blanks, lives)
         print(result)
-        play_game = True if result == '' else False
+        play_game = (result == "")
 
     new_game = hangman.play_again()
     if not new_game:
