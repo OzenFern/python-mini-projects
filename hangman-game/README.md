@@ -1,4 +1,4 @@
-# Hangman Game (Python)
+# Hangman Game
 
 A terminal-based **Hangman game** written in Python.  
 This project focuses on clean function design, modular code structure, and basic game logic.
@@ -9,10 +9,10 @@ The game randomly selects a word and lets the player guess letters one at a time
 Incorrect guesses reduce lives, visually represented using ASCII hangman stages.
 
 The code is split into multiple files to keep responsibilities clear:
-- game logic
-- word data
+- Game logic
+- Word data
 - ASCII visuals
-- program entry point
+- Program entry point
 
 
 ## How It Works
@@ -41,7 +41,7 @@ The code is split into multiple files to keep responsibilities clear:
 
 ## Requirements
 
-- Python (no external libraries required)
+- Python (no external libraries required).
 
 
 ## Notes
