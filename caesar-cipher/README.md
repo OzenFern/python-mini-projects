@@ -17,7 +17,7 @@ _Includes a fun ASCII logo to make the program more lively!_
 
 1. Run the program.
 2. Choose `'E'` to encrypt or `'D'` to decrypt.
-3. Enter your message (letters only; converted to uppercase automatically).
+3. Enter your message (Supports ciphering of alphabets and numbers, automatically converted to uppercase).
 4. Enter the shift number.
 5. See the encoded or decoded result.
 6. Repeat or exit by typing `'N'`.
@@ -27,23 +27,20 @@ _Includes a fun ASCII logo to make the program more lively!_
 ```
 Type 'E' to encrpt and 'D' to decrypt: E
 Enter message to encrypt:
-Hello World
+Hello World! From #User1985
 Enter the shift number:
-6
-Your encoded Caesar Cipher is: NKRRU CUXRJ
-_  _  _  _  _  _  _  _  _  _  _  _  _  _  _  _  _  _
-
+9
+Your encoded Caesar Cipher is: QNUUX 5X0UM! O0XV #31N0AIHE
+_  _  _  _  _  _  _  _  _  _  _  _  _
 Type 'N' to exit, or press any key to cipher again: Y
-_  _  _  _  _  _  _  _  _  _  _  _  _  _  _  _  _  _
-
+_  _  _  _  _  _  _  _  _  _  _  _  _
 Type 'E' to encrpt and 'D' to decrypt: D
 Enter message to decrypt:
-NKRRU CUXRJ
+QNUUX 5X0UM! O0XV #31N0AIHE
 Enter the shift number:
-6
-Your decoded Caesar Cipher is: HELLO WORLD
-_  _  _  _  _  _  _  _  _  _  _  _  _  _  _  _  _  _
-
+9
+Your decoded Caesar Cipher is: HELLO WORLD! FROM #USER1985
+_  _  _  _  _  _  _  _  _  _  _  _  _
 Type 'N' to exit, or press any key to cipher again: N
 Bye, see you again!
 ```
