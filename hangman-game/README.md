@@ -4,7 +4,13 @@ A terminal-based **Hangman game** written in Python. This project focuses on cle
 
 ## About
 
-The game randomly selects a word and lets the player guess letters one at a time. Incorrect guesses reduce lives, visually represented using ASCII hangman stages. Hints are available but subject to rules: hints unlock after your first wrong guess, are disabled when only one life or only one unknown letter remains, and have a per-difficulty cap. Use `!` during play to reveal a single letter when allowed.
+- The game randomly selects a word and lets the player guess letters one at a time. 
+- Incorrect guesses reduce lives, visually represented using ASCII hangman stages. 
+- Hints are available but subject to rules:
+  - They have a per-difficulty cap. 
+  - Unlocked after your first wrong guess.
+  - Disabled when only one life or only one unknown letter remains.
+- Use `!` during play to reveal a single letter when allowed.
 
 ## Features
 
@@ -14,7 +20,7 @@ The game randomly selects a word and lets the player guess letters one at a time
   - Normal (default): cap 2, hint percentage 30%
   - Hard: cap 1, hint percentage 20%
 - Hints unlock after the first wrong guess and consume one hint each time.
-- Words include 5- to 8-letter options to vary difficulty and replayability.
+- Words include 5 - 8 letter options to vary difficulty and replayability.
 
 ## Files Overview
 
@@ -33,6 +39,3 @@ The game randomly selects a word and lets the player guess letters one at a time
 - Type `!` during a turn to attempt using a hint (reveals one letter) when allowed.
 - Already guessed letters do not reduce lives and attempting them will notify the player.
 - The game ends when the secret word is fully revealed or when lives reach zero. After a game ends, you can choose to play again or quit.
-
-
-(Sections "License" and "How to Run" have been removed to match the latest project changes.)
