@@ -1,6 +1,7 @@
 # Hangman Game
 
-A terminal-based **Hangman game** written in Python. This project focuses on clean function design, modular code structure, and basic game logic.
+A terminal-based **Hangman game** written in Python.  
+This project focuses on clean function design, modular code structure, and basic game logic.
 
 ## About
 
@@ -24,14 +25,22 @@ A terminal-based **Hangman game** written in Python. This project focuses on cle
 
 ## Files Overview
 
-- `main.py`  - Entry point of the program; controls the game loop and player interaction.
-- `hangman.py` - Core game logic, input handling, and display functions (difficulty, hints, lives, and game state).
-- `words.py` - Word lists (5- to 8-letter words) used to pick the secret word.
-- `ascii_art.py` - Game logo and hangman stage visuals.
+- `main.py`  
+  Entry point of the program. Controls the game loop and player interaction.
+
+- `hangman.py`  
+  Contains the core game logic, input handling, and display functions.
+
+- `words.py`  
+  Stores the list of possible words.
+
+- `ascii_art.py`  
+  Contains the game logo and hangman stage visuals.
 
 ## Requirements
 
-- Python 3.x (no external libraries required)
+- Python (no external libraries required).
+
 
 ## Notes
 
