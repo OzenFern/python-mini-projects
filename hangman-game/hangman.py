@@ -83,7 +83,7 @@ def get_difficulty():
         choice = input(
             "Select game difficulty...\n" "(E: Easy, N: Normal (Default), H: Hard): "
         )
-        choice = choice.upper().strip()
+        choice = choice.upper().strip()[:1]
         if choice in choices_list:
             if choice == "E":
                 return "Easy", 3, 0.4
