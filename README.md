@@ -28,10 +28,20 @@ cd python-mini-projects
 2. **Run a project**
    Navigate into the project folder and execute the main script:
 
+#### On Windows
+
 ```powershell
 cd caesar-cipher
-python main.py
+py main.py
 ```
+
+#### On Linux and MacOS
+
+```bash
+cd caesar-cipher
+python3 main.py
+```
+
 ## 📜 License
 
 Distributed under the [MIT License](LICENSE).
