@@ -8,6 +8,7 @@ def pretty_line():
 
 def build_shift_map(p_shift_number, CHAR = CHARACTERS):
     length = len(CHAR)
+    p_shift_number %= length
     cipher_dict = {}
     for i in range(length):
         key = CHAR[i]
@@ -34,7 +35,7 @@ program_end = False
 while not program_end:
     pretty_line()
     enc_dec = input("Type 'E' to encrypt and 'D' to decrypt: ").upper()
-    while enc_dec != "E" and enc_dec != "D":  # Get a valid option
+    while enc_dec not in ("E", "D"):
         enc_dec = input("Enter 'E' to encrypt and 'D' to decrypt: ").upper()
     message = input(
         f"Enter message to {'encrypt' if enc_dec == 'E' else 'decrypt'}:\n"
