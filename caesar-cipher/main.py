@@ -1,55 +1,65 @@
 from logo import logo
-from characters import CHARACTERS
+from string import ascii_uppercase, digits
 
+CHARACTERS = ascii_uppercase + digits
 
 def pretty_line():
     print(f"{' _ ' * 30:^120}\n")
 
+def get_input(prompt):
+    return input(prompt).upper().strip()
 
-def build_shift_map(p_shift_number, CHAR = CHARACTERS):
-    length = len(CHAR)
-    p_shift_number %= length
-    cipher_dict = {}
-    for i in range(length):
-        key = CHAR[i]
-        cipher_dict[key] = CHAR[(i + p_shift_number) % length]
-    return cipher_dict
-    
+def build_shift_map(shift_number):
+    """
+    Returns a dictionary mapping each character in CHARACTERS
+    to its shifted counterpart based on shift_number.
+    """
+    length = len(CHARACTERS)
+    shift_number %= length
+    shifted_chars = CHARACTERS[shift_number:] + CHARACTERS[:shift_number]
+    return dict(zip(CHARACTERS, shifted_chars))
 
-def caesar_cipher(p_initial_text, p_shift_number, p_cipher_type):
-    initial_list = list(p_initial_text)
-    if p_cipher_type == "D":
-        p_shift_number = -p_shift_number
-    cipher_map = build_shift_map(p_shift_number)
-    for i in range(len(initial_list)):
-        if initial_list[i] in cipher_map:
-            initial_list[i] = cipher_map[initial_list[i]]
-    final_text = "".join(initial_list)
+def caesar_cipher(text, shift_number, mode):
+    """
+    Encrypts or decrypts a message using Caesar Cipher.
+    mode: 'E' for encrypt, 'D' for decrypt
+    """
+    if mode == "D":
+        shift_number = -shift_number
+    cipher_map = build_shift_map(shift_number)
+    return "".join(cipher_map.get(char, char) for char in text)
 
-    return f"Your {'decoded' if p_cipher_type == 'D' else 'encoded'} Caesar Cipher is: {final_text}"
+def get_mode():
+    mode = get_input("Type 'E' to encrypt and 'D' to decrypt: ")
+    while mode not in ("E", "D"):
+        mode = get_input("Enter 'E' to encrypt and 'D' to decrypt: ")
+    return mode
 
+def get_message(mode):
+    return get_input(f"Enter message to {'encrypt' if mode == 'E' else 'decrypt'}:\n")
 
-print(logo)
-
-program_end = False
-while not program_end:
-    pretty_line()
-    enc_dec = input("Type 'E' to encrypt and 'D' to decrypt: ").upper()
-    while enc_dec not in ("E", "D"):
-        enc_dec = input("Enter 'E' to encrypt and 'D' to decrypt: ").upper()
-    message = input(
-        f"Enter message to {'encrypt' if enc_dec == 'E' else 'decrypt'}:\n"
-    ).upper()
+def get_shift_number():
     while True:
         try:
-            shift_number = int(input("Enter the shift number:\n"))
-            break
+            return int(get_input("Enter the shift number:\n"))
         except ValueError:
             print("Please enter an integer number")
-    output = caesar_cipher(message, shift_number, enc_dec)
-    print(output)
+
+def play_again():
+    choice = get_input("Type 'N' to exit, or press any key to cipher again: ")
+    return choice != "N"
+
+# Driver Code
+
+print(logo)
+while True:
     pretty_line()
-    again = input("Type 'N' to exit, or press any key to cipher again: ").upper()
-    if again == "N":
-        program_end = True
+    mode = get_mode()
+    message = get_message(mode)
+    shift = get_shift_number()
+    result = caesar_cipher(message, shift, mode)
+    print(f"Your {'decoded' if mode == 'D' else 'encoded'} Caesar Cipher is: {result}")
+    pretty_line()
+    if not play_again():
         print("Bye, see you again!")
+        break
