@@ -34,7 +34,6 @@ def append_bidder():
         return
     bid = get_bid_amt()
     bidder[name] = bid
-    return bidder
 
 
 def build_bidder_dict():
@@ -43,10 +42,12 @@ def build_bidder_dict():
         append_bidder()
         next_bidder = get_input("Are there any other bidders? (Y/N): ")
         clear_screen()
-    return bidder
 
 
 def highest_bidder():
+    if not bidder:
+        print("Not bids were placed")
+        return
     key = max(bidder, key=bidder.get)
     print(f"The winner is {key} with a bid of ${bidder[key]}")
 
