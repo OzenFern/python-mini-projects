@@ -12,7 +12,7 @@ def clear_screen():
 
 
 def get_input(prompt):
-    return input(prompt).rstrip().capitalize()
+    return input(prompt).rstrip()
 
 
 def get_bid_amt():
@@ -28,10 +28,11 @@ def get_bid_amt():
 
 
 def append_bidder():
-    name = get_input("Enter your name: ")
-    if name in bidder:
+    while True:
+        name = get_input("Enter your name: ")
+        if name not in bidder:
+            break
         print("Name is already registered, write a diffent name.")
-        return
     bid = get_bid_amt()
     bidder[name] = bid
 
@@ -40,7 +41,7 @@ def build_bidder_dict():
     next_bidder = "Y"
     while next_bidder != "N":
         append_bidder()
-        next_bidder = get_input("Are there any other bidders? (Y/N): ")
+        next_bidder = get_input("Are there any other bidders? (Y/N): ").upper()
         clear_screen()
 
 
