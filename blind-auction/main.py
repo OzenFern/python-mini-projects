@@ -1,15 +1,18 @@
 from ascii_art import logo
 import os
 
+# Declaring an empty bidders dictionary
+bidder = {}
+
 
 # Fucntion Definition
-def start_auction():
+def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
     print(logo)
 
 
 def get_input(prompt):
-    return input(prompt).strip()
+    return input(prompt).rstrip().capitalize()
 
 
 def get_bid_amt():
@@ -24,7 +27,25 @@ def get_bid_amt():
             print("Please enter a number")
 
 
+def append_bidder():
+    name = get_input("Enter your name: ")
+    if name in bidder:
+        print("Name is already registered, write a diffent name.")
+        return
+    bid = get_bid_amt()
+    bidder[name] = bid
+    return bidder
+
+
+def build_bidder_dict():
+    next_bidder = "Y"
+    while next_bidder != "N":
+        append_bidder()
+        next_bidder = get_input("Are there any other bidders? (Y/N): ")
+        clear_screen()
+    return bidder
+
+
 # Driver
-start_auction()
-name = get_input("Enter your name: ")
-get_bid_amt()
+clear_screen()
+build_bidder_dict()
