@@ -46,6 +46,12 @@ def build_bidder_dict():
     return bidder
 
 
+def highest_bidder():
+    key = max(bidder, key=bidder.get)
+    print(f"The winner is {key} with a bid of ${bidder[key]}")
+
+
 # Driver
 clear_screen()
 build_bidder_dict()
+highest_bidder()
