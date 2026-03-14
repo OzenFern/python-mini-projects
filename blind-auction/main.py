@@ -38,10 +38,10 @@ def append_bidder():
 
 
 def build_bidder_dict():
-    next_bidder = "Y"
-    while next_bidder != "N":
+    while True:
         append_bidder()
-        next_bidder = get_input("Are there any other bidders? (Y/N): ").upper()
+        if get_input("Are there any other bidders? (Y/N): ").upper() == "N":
+            break
         clear_screen()
 
 
