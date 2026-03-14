@@ -47,7 +47,7 @@ def build_bidder_dict():
 
 def highest_bidder():
     if not bidder:
-        print("Not bids were placed")
+        print("No bids were placed")
         return
     key = max(bidder, key=bidder.get)
     print(f"The winner is {key} with a bid of ${bidder[key]}")
