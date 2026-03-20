@@ -10,9 +10,10 @@ def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
 
 
-def greeting_message():
+def greeting_message(no_of_questions):
+    print(logo)
     print(
-        "There are a total of 6 questions, you can skip a question anytime by typing 'skip'"
+        f"There are a total of {no_of_questions} questions, you can skip a question anytime by typing 'skip'"
     )
     return input("Press any key to continue... ")
 
@@ -122,8 +123,7 @@ def show_answers():
 
 # Initializing the game
 clear_screen()
-print(logo)
-greeting_message()
+greeting_message(len(quiz))
 names, players = initialise_players()
 name_width, score_width = get_widths(players)
 run_quiz(names, players, name_width, score_width)
