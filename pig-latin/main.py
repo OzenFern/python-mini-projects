@@ -7,7 +7,7 @@ def get_input(prompt):
     return input(prompt).strip()
 
 
-def break_msg(message):
+def split_msg(message):
     return message.split()
 
 
