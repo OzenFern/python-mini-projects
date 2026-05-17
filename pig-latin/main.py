@@ -1,3 +1,6 @@
+from ascii_art import logo
+
+
 # Constants
 VOWELS = ("A", "E", "I", "O", "U")
 
@@ -73,6 +76,7 @@ def rebuild_msg(msg_list):
 
 
 # Driver Code
+print(logo)
 message = get_input("Enter a message in English: ")
 split_message = split_msg(message)
 pig_latin = []
