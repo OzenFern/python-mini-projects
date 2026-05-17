@@ -43,11 +43,12 @@ def word_separator(word):
 
 def check_letter(text):
     """
-    Returns two Boolean Values
+    Returns three Boolean Values
     Checks if the first letter is a vowel,
     Checks if the first letter is in uppercase
+    Checks if the whole word is in uppercase
     """
-    return (text[0].upper() in VOWELS, text[0].isupper())
+    return (text[0].upper() in VOWELS, text[0].isupper(), text.isupper())
 
 
 def transform_text(text):
@@ -59,13 +60,15 @@ def transform_text(text):
     if not text:
         return text
 
-    vowel, is_upper = check_letter(text)
+    vowel, is_title, is_upper = check_letter(text)
     if vowel:
         text += "yay"
     else:
         text = text[1:] + text[0] + "ay"
 
     if is_upper:
+        return text.upper()
+    elif is_title:
         return text.capitalize()
     return text
 
