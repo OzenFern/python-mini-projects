@@ -1,6 +1,5 @@
 from ascii_art import logo
 
-
 # Constants
 VOWELS = ("A", "E", "I", "O", "U")
 
@@ -8,7 +7,7 @@ VOWELS = ("A", "E", "I", "O", "U")
 # Function Definition
 def get_input(prompt):
     """
-   Return a string with no trailing whitespaces
+    Return a string with no trailing whitespaces
     """
     return input(prompt).strip()
 
@@ -56,7 +55,7 @@ def transform_text(text):
     Transform text into pig latin.
     If empty return empty string.
     """
-    
+
     if not text:
         return text
 
@@ -70,8 +69,9 @@ def transform_text(text):
         return text.capitalize()
     return text
 
+
 def rebuild_msg(msg_list):
-    text_list = [prefix+core+suffix for prefix, core, suffix in msg_list]
+    text_list = [prefix + core + suffix for prefix, core, suffix in msg_list]
     return " ".join(text_list)
 
 
@@ -86,4 +86,3 @@ for word in split_message:
     pig_latin.append((prefix, core, suffix))
 
 print(f"Pig Latin: {rebuild_msg(pig_latin)}")
-
