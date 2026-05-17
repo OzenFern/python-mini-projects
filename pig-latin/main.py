@@ -59,13 +59,13 @@ def transform_text(text):
     if not text:
         return text
 
-    vowel, case = check_letter(text)
+    vowel, is_upper = check_letter(text)
     if vowel:
         text += "yay"
     else:
         text = text[1:] + text[0] + "ay"
 
-    if case:
+    if is_upper:
         return text.capitalize()
     return text
 
