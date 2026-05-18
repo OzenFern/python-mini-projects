@@ -1,7 +1,10 @@
 from ascii_art import logo
 from albums import tracks
 
-app_state = {"separator": ":", "song_history": [], "headers": ("Band", "Song")}
+app_state = {
+    "separator": ":",
+    "song_history": [],
+}
 
 
 def display_tracks():
@@ -38,7 +41,7 @@ def get_song(choices):
         except IndexError:
             return (False, "Numbering out of bounds!")
         else:
-            app_state["song_history"].insert(0, (band, song))
+            add_to_history(band, song)
             return (True, f"Playing: {song} by {band}")
 
 
@@ -56,38 +59,54 @@ def select_song():
             return
 
 
-def calculate_width(headers=app_state["headers"], rows=app_state["song_history"]):
+def calculate_width(headers, rows):
     if not rows:
-        return tuple([15] * len(headers))
+        return tuple(max(len(header), 15) for header in headers)
     columns = zip(*rows)
-    widths = []
-    for header, column in zip(headers, columns):
-        widths.append(max(len(header), max(len(str(item)) for item in column)))
+    widths = [
+        max(len(header), max(len(str(item)) for item in column))
+        for header, column in zip(headers, columns)
+    ]
     return tuple(widths)
 
 
-def display_line(padding=6):
-    band_width, song_width = calculate_width()
-    print("-" * (band_width + song_width + padding))
+def display_line(widths):
+    """
+    Automatic width calculation.
+    1 for '|', 2 spaces per character + 1 trailing character at the end.
+    Eg: "|" + "  {content} |"
+    """
+    print("-" * (sum(widths) + len(widths) * 3 + 1))
 
 
-def display_header(headings):
-    widths = calculate_width()
+def display_header(headings, widths):
     print()
-    display_line()
+    display_line(widths)
     print("|", end=" ")
     for heading, width in zip(headings, widths):
         print("{:^{}} |".format(heading, width), end=" ")
     print(end="\n")
-    display_line()
+    display_line(widths)
+
+
+def add_to_history(band, song):
+    app_state["song_history"].insert(0, (band, song))
 
 
 def display_history():
-    band_width, song_width = calculate_width()
-    display_header(app_state["headers"])
-    for band, song in app_state["song_history"]:
-        print(f"| {band:<{band_width}} | {song:<{song_width}} |")
-    display_line()
+    headers = ("Sr No.", "Band", "Song")
+
+    display_rows = [
+        (i, *row) for i, row in enumerate(app_state["song_history"], start=1)
+    ]
+    widths = calculate_width(headers, display_rows)
+    display_header(headers, widths)
+    for row in display_rows:
+        print("|", end=" ")
+        for item, width in zip(row, widths):
+            print(f"{str(item):<{width}} |", end=" ")
+        print()
+    display_line(widths)
 
 
 def display_message(message):
