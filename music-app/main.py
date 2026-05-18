@@ -1,7 +1,7 @@
 from ascii_art import logo
 from albums import tracks
 
-app_state = {"separator": ":", "song_history": []}
+app_state = {"separator": ":", "song_history": [], "headers": ("Band", "Song")}
 
 
 def display_tracks():
@@ -27,18 +27,18 @@ def is_digit(choices):
 def get_song(choices):
     if not is_len_two(choices):
         return (False, "Two numbers are required!")
-    elif not is_digit(choices):
+    elif not is_digit(choices):  # Handles negative numbering too
         return (False, "Please enter a valid number!")
     else:
-        band, song = list(map(int, choices))
+        band_num, song_num = list(map(int, choices))
         try:
-            band, song = tracks[band - 1][0], tracks[band - 1][1][song - 1]
-            if any((band, song)) < 0:
+            if 0 in (band_num, song_num):  # Don't allow zero
                 raise IndexError
+            band, song = tracks[band_num - 1][0], tracks[band_num - 1][1][song_num - 1]
         except IndexError:
             return (False, "Numbering out of bounds!")
         else:
-            app_state["song_history"].append((band, song))
+            app_state["song_history"].insert(0, (band, song))
             return (True, f"Playing: {song} by {band}")
 
 
@@ -56,23 +56,37 @@ def select_song():
             return
 
 
-def display_line(width=45):
-    print("-" * width)
+def calculate_width(headers=app_state["headers"], rows=app_state["song_history"]):
+    if not rows:
+        return tuple([15] * len(headers))
+    columns = zip(*rows)
+    widths = []
+    for header, column in zip(headers, columns):
+        widths.append(max(len(header), max(len(str(item)) for item in column)))
+    return tuple(widths)
 
 
-def display_header(headings, width=15):
+def display_line(padding=6):
+    band_width, song_width = calculate_width()
+    print("-" * (band_width + song_width + padding))
+
+
+def display_header(headings):
+    widths = calculate_width()
+    print()
     display_line()
     print("|", end=" ")
-    for heading in headings:
+    for heading, width in zip(headings, widths):
         print("{:^{}} |".format(heading, width), end=" ")
     print(end="\n")
     display_line()
 
 
 def display_history():
-    display_header(("Band", "Song"))
+    band_width, song_width = calculate_width()
+    display_header(app_state["headers"])
     for band, song in app_state["song_history"]:
-        print(f"| {band:<15} | {song:<15} |")
+        print(f"| {band:<{band_width}} | {song:<{song_width}} |")
     display_line()
 
 
