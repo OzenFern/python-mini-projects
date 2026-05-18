@@ -63,11 +63,12 @@ def calculate_width(headers, rows):
     if not rows:
         return tuple(max(len(header), 15) for header in headers)
     columns = zip(*rows)
-    widths = [
-        max(len(header), max(len(str(item)) for item in column))
-        for header, column in zip(headers, columns)
-    ]
-    return tuple(widths)
+    return tuple(
+        [
+            max(len(header), max(len(str(item)) for item in column))
+            for header, column in zip(headers, columns)
+        ]
+    )
 
 
 def display_line(widths):
