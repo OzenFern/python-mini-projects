@@ -47,24 +47,34 @@ music-simulation-app/
 # Example Data Structure
 
 ```python
-tracks = (
+tracks = [
     (
         "Green Day",
-        (
+        [
             "Somewhere Now",
             "Bang Bang",
             "Revolution Radio",
-        ),
+            "Say Goodbye",
+            "Outlaws",
+        ],
     ),
-)
+]
 ```
 
 This project heavily focuses on working with:
 
-- tuples inside tuples
-- tuple indexing
+- nested data structures
+- tuples and lists
+- nested indexing
 - nested iteration
-- unpacking
+- tuple unpacking
+- dynamic table rendering
+- reusable utility functions
+
+## Design Evolution
+
+This project originally started as a nested tuple practice app.
+During development, the music library structure was redesigned to use mutable nested lists for songs, making the application behave more like a realistic music management system where tracks can be added or removed dynamically.
 
 ---
 
