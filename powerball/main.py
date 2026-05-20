@@ -77,6 +77,7 @@ def print_fee(attempts, cost=2):
 print(logo)
 white_balls = get_white_balls()
 powerball = get_single_number("Enter Powerball number from 1 to 26", 1, 26)
-num_of_plays = get_single_number(
+attempts = get_single_number(
     "How many times do you want to play? (Max: 1000000)", 1, 1000000
 )
+print_fee(attempts)
