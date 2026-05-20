@@ -105,12 +105,11 @@ def play_powerball(user_white_balls, user_powerball):
     white_matches = len((user_white_balls & winning_white_balls))
     powerball_match = user_powerball == winning_powerball
 
-    return PRIZES[(white_matches, powerball_match)]
+    prize = PRIZES[(white_matches, powerball_match)]
 
-
-def display_winning_numbers(white_nums, red_num, result):
+    white_balls_str = ", ".join(map(str, sorted(winning_white_balls)))
     print(
-        f"The winning numbers are: {", ".join(white_nums)} and {red_num} {result:>20}"
+        f"The winning numbers are: {white_balls_str:<20} Powerball: {winning_powerball:<5} Prize: {prize:<15}"
     )
 
 
@@ -123,3 +122,5 @@ attempts = get_single_number(
     "How many times do you want to play? (Max: 1000000)", 1, 1000000
 )
 print_fee(attempts)
+for _ in range(attempts):
+    prize = play_powerball(white_balls, powerball)
