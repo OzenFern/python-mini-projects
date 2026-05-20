@@ -1,4 +1,20 @@
 from ascii_art import logo
+from random import sample, randint
+
+PRIZES = {
+    (5, True): "Jackpot",
+    (5, False): "$1,000,000",
+    (4, True): "$50,000",
+    (4, False): "$100",
+    (3, True): "$100",
+    (3, False): "$7",
+    (2, True): "$7",
+    (2, False): "$0",
+    (1, True): "$4",
+    (1, False): "$0",
+    (0, True): "$4",
+    (0, False): "$0",
+}
 
 # Function Definition
 
@@ -49,7 +65,7 @@ def get_white_balls():
         elif not check_white_balls(numbers):
             print_message("Please select numbers from 1 to 69!")
         else:
-            return numbers
+            return set(numbers)
 
 
 def num_is_between(num_to_check, from_num, to_num):
@@ -66,9 +82,35 @@ def get_single_number(message, from_num, to_num):
         else:
             return number
 
+
 def print_fee(attempts, cost=2):
     print_message(
-        f"It costs ${attempts*cost} to play for {attempts} time{'s' if attempts != 1 else ''}"
+        f"It costs ${attempts*cost} to play for {attempts} time{'s' if attempts != 1 else ''}, "
+        "But don't worry, I'm sure you'll win it all back."
+    )
+
+
+def white_balls_lottery():
+    return sample(range(1, 70), k=5)
+
+
+def powerball_lottery():
+    return randint(1, 26)
+
+
+def play_powerball(user_white_balls, user_powerball):
+    winning_white_balls = set(white_balls_lottery())
+    winning_powerball = powerball_lottery()
+
+    white_matches = len((user_white_balls & winning_white_balls))
+    powerball_match = user_powerball == winning_powerball
+
+    return PRIZES[(white_matches, powerball_match)]
+
+
+def display_winning_numbers(white_nums, red_num, result):
+    print(
+        f"The winning numbers are: {", ".join(white_nums)} and {red_num} {result:>20}"
     )
 
 
