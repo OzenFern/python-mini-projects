@@ -37,7 +37,7 @@ def get_white_balls():
         )
         numbers = get_white_numbers(balls)
         if None in numbers:
-            print_message("Enter numbers only!")
+            print_message("Only numbers and spaces are allowed!")
         elif not check_len(numbers):
             print_message("Please enter 5 distinct numbers!")
         elif not check_white_balls(numbers):
@@ -46,17 +46,17 @@ def get_white_balls():
             return numbers
 
 
-def check_powerball(number):
-    return 1 <= number <= 26
+def num_is_between(num_to_check, from_num, to_num):
+    return from_num <= num_to_check <= to_num
 
 
-def get_powerball():
+def get_single_number(message, from_num, to_num):
     while True:
-        number = convert_to_int(get_input("Enter Powerball number from 1 to 26"))
+        number = convert_to_int(get_input(message))
         if number == None:
             print_message("Please enter a single number!")
-        elif not check_powerball(number):
-            print_message("Please select numbers from 1 to 26!")
+        elif not num_is_between(number, from_num, to_num):
+            print_message(f"Please select numbers from {from_num} to {to_num}!")
         else:
             return number
 
@@ -65,4 +65,7 @@ def get_powerball():
 
 print(logo)
 white_balls = get_white_balls()
-powerball = get_powerball()
+powerball = get_single_number("Enter Powerball number from 1 to 26", 1, 26)
+num_of_plays = get_single_number(
+    "How many times do you want to play? (Max: 1000000)", 1, 1000000
+)
