@@ -87,6 +87,10 @@ def calculate_total_amount():
 def calculate_fee(attempts, cost=app_state["cost_per_attempt"]):
     total_cost = attempts * cost
     app_state["amount_lost"] += total_cost
+    return total_cost
+
+
+def print_fee(attempts,total_cost):
     print_message(
         f"It costs ${total_cost} to play for {attempts} time{'s' if attempts != 1 else ''}"
     )
@@ -104,4 +108,5 @@ attempts = get_single_number(
     "How many times do you want to play? (Max: 1000000)", 1, 1000000
 )
 app_state["atempts"] += attempts
-calculate_fee(attempts)
+total_cost = calculate_fee(attempts)
+print_fee(attempts, total_cost)
