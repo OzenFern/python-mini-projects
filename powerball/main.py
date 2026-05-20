@@ -1,5 +1,14 @@
 from ascii_art import logo
 
+app_state = {
+    "cost_per_attempt": 2,
+    "initial_amount": 100,
+    "atempts": 0,
+    "amount_earned": 0,
+    "amount_lost": 0,
+    "total_amount": 0,
+}
+
 # Function Definition
 
 
@@ -67,11 +76,32 @@ def get_single_number(message, from_num, to_num):
             return number
 
 
+def calculate_total_amount():
+    app_state["total_amount"] += (
+        app_state["initial_amount"]
+        + app_state["amount_earned"]
+        - app_state["amount_lost"]
+    )
+
+
+def calculate_fee(attempts, cost=app_state["cost_per_attempt"]):
+    total_cost = attempts * cost
+    app_state["amount_lost"] += total_cost
+    print_message(
+        f"It costs ${total_cost} to play for {attempts} time{'s' if attempts != 1 else ''}"
+    )
+
+
 # Driver Code
 
 print(logo)
+print_message(
+    f"Welcome player! You've been given ${app_state['initial_amount']} to play Powerball!"
+)
 white_balls = get_white_balls()
 powerball = get_single_number("Enter Powerball number from 1 to 26", 1, 26)
-num_of_plays = get_single_number(
+attempts = get_single_number(
     "How many times do you want to play? (Max: 1000000)", 1, 1000000
 )
+app_state["atempts"] += attempts
+calculate_fee(attempts)
