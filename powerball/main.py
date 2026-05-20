@@ -66,6 +66,11 @@ def get_single_number(message, from_num, to_num):
         else:
             return number
 
+def print_fee(attempts, cost=2):
+    print_message(
+        f"It costs ${attempts*cost} to play for {attempts} time{'s' if attempts != 1 else ''}"
+    )
+
 
 # Driver Code
 
