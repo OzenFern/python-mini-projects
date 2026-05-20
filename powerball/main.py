@@ -18,12 +18,16 @@ def convert_to_int(number):
         return None
 
 
-def get_white_numbers(numbers):
-    return set(map(convert_to_int, numbers.split()))
+def parse_white_numbers(raw_input):
+    return list(map(convert_to_int, raw_input.split()))
 
 
-def check_len(numbers):
+def has_five_numbers(numbers):
     return len(numbers) == 5
+
+
+def has_unique_numbers(numbers):
+    return len(set(numbers)) == 5
 
 
 def check_white_balls(numbers):
@@ -35,10 +39,12 @@ def get_white_balls():
         balls = get_input(
             "Enter 5 different numbers from 1 to 69, with spaces between them \n(For Example: 6 23 34 49 68)"
         )
-        numbers = get_white_numbers(balls)
+        numbers = parse_white_numbers(balls)
         if None in numbers:
             print_message("Only numbers and spaces are allowed!")
-        elif not check_len(numbers):
+        elif not has_five_numbers(numbers):
+            print_message("Please enter exactly 5 numbers!")
+        elif not has_unique_numbers(numbers):
             print_message("Please enter 5 distinct numbers!")
         elif not check_white_balls(numbers):
             print_message("Please select numbers from 1 to 69!")
@@ -53,7 +59,7 @@ def num_is_between(num_to_check, from_num, to_num):
 def get_single_number(message, from_num, to_num):
     while True:
         number = convert_to_int(get_input(message))
-        if number == None:
+        if number is None:
             print_message("Please enter a single number!")
         elif not num_is_between(number, from_num, to_num):
             print_message(f"Please select numbers from {from_num} to {to_num}!")
