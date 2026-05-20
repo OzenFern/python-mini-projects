@@ -15,11 +15,11 @@ def convert_to_int(number):
     try:
         return int(number)
     except ValueError:
-        return 0
+        return None
 
 
 def get_white_numbers(numbers):
-    return set(map(convert_to_int, numbers))
+    return set(map(convert_to_int, numbers.split()))
 
 
 def check_len(numbers):
@@ -36,7 +36,7 @@ def get_white_balls():
             "Enter 5 different numbers from 1 to 69, with spaces between them \n(For Example: 6 23 34 49 68)"
         )
         numbers = get_white_numbers(balls)
-        if 0 in numbers:
+        if None in numbers:
             print_message("Enter numbers only!")
         elif not check_len(numbers):
             print_message("Please enter 5 distinct numbers!")
@@ -53,9 +53,9 @@ def check_powerball(number):
 def get_powerball():
     while True:
         number = convert_to_int(get_input("Enter Powerball number from 1 to 26"))
-        if number == 0:
+        if number == None:
             print_message("Please enter a single number!")
-        elif check_powerball(number):
+        elif not check_powerball(number):
             print_message("Please select numbers from 1 to 26!")
         else:
             return number
