@@ -139,7 +139,7 @@ def end_round_message(total_cost, prize):
 
 
 def possible_attempts():
-    return game_state["total_amount"] // 2
+    return game_state["total_amount"] // game_state["cost_per_attempt"]
 
 
 def calculate_total_amount():
@@ -219,7 +219,9 @@ def continue_to_play():
 
 print(logo)
 game_state["initial_amount"] = get_single_number(
-    "Welcome Player!\n How much are you willing to bet?", 2, 1_000
+    "Welcome Player!\n How much are you willing to bet?",
+    game_state["cost_per_attempt"],
+    1_000,
 )
 print_message(f"You've decided to bet ${game_state['initial_amount']} on Powerball!")
 calculate_total_amount()
