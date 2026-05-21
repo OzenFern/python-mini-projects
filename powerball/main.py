@@ -178,13 +178,6 @@ def start_round():
         if proceed == "r":
             print_message("Reverting...")
             continue
-        if attempts <= max_attempts:
-            game_state["amount_lost"] += total_cost
-        else:
-            print_message(
-                f"You have insufficient funds to play for {attempts} attempts!"
-            )
-            continue
         return attempts, total_cost
 
 
