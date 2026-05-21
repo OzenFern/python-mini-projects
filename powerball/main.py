@@ -18,18 +18,12 @@ PRIZES = {
 
 game_state = {
     "cost_per_attempt": 2,
-    "initial_amount": 00,
+    "initial_amount": 0,
+    "max_initial_amount": 1000,
     "attempts": 0,
     "amount_earned": 0,
     "amount_lost": 0,
-    "total_amount": 0,
 }
-
-user_funds = (
-    ("Amount Earned", "amount_earned"),
-    ("Amount Lost", "amount_lost"),
-    ("Balance", "total_amount"),
-)
 
 # Function Definition
 
@@ -139,11 +133,11 @@ def end_round_message(total_cost, prize):
 
 
 def possible_attempts():
-    return game_state["total_amount"] // game_state["cost_per_attempt"]
+    return calculate_total_amount() // game_state["cost_per_attempt"]
 
 
 def calculate_total_amount():
-    game_state["total_amount"] = (
+    return (
         game_state["initial_amount"]
         + game_state["amount_earned"]
         - game_state["amount_lost"]
@@ -182,14 +176,16 @@ def start_round():
 
 
 def can_play_game():
-    return game_state["total_amount"] > game_state["cost_per_attempt"]
+    return calculate_total_amount() >= game_state["cost_per_attempt"]
 
 
 def print_user_funds():
-    print("\tFunds Status: ", end="")
-    for txt, key in user_funds:
-        print(f"{txt}: ${game_state[key]:,}", end=" | ")
-    print("\n")
+    print_message(f"""
+    {'Funds Status'.center(20, "-")}
+    Amount Earned: ${game_state['amount_earned']:,}
+    Amount Lost:   ${game_state['amount_lost']:,}
+    Balance:       ${calculate_total_amount():,}
+    """)
 
 
 def powerball_app():
@@ -212,15 +208,14 @@ def continue_to_play():
 
 print(logo)
 game_state["initial_amount"] = get_single_number(
-    "Welcome Player!\n\tHow much money would you like to start with?",
+    f"Welcome Player!\n How much money would you like to start with? (Enter between ${game_state['cost_per_attempt']} to ${game_state['max_initial_amount']})",
     game_state["cost_per_attempt"],
-    1_000,
+    game_state["max_initial_amount"],
 )
-print_message(f"You've decided to bet ${game_state['initial_amount']} on Powerball!")
+print_message(f"Balance of ${game_state['initial_amount']} added!")
 calculate_total_amount()
 while can_play_game():
     powerball_app()
-    calculate_total_amount()
     print_user_funds()
     continue_to_play()
 
