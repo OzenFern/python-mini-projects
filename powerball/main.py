@@ -139,7 +139,7 @@ def end_round_message(total_cost, prize):
 
 
 def calculate_total_amount():
-    game_state["total_amount"] += (
+    game_state["total_amount"] = (
         game_state["initial_amount"]
         + game_state["amount_earned"]
         - game_state["amount_lost"]
@@ -148,7 +148,6 @@ def calculate_total_amount():
 
 def calculate_fee(attempts, cost=game_state["cost_per_attempt"]):
     total_cost = attempts * cost
-    game_state["amount_lost"] += total_cost
     return total_cost
 
 
@@ -206,7 +205,7 @@ def powerball_app():
 
 def continue_to_play():
     proceed = get_input("Would you like to play again? (y/n)").lower()
-    if proceed == "y":
+    if proceed != "y":
         print_message("Goodbye, hope to see you again...")
         quit()
     print_message("All the best for your next game!")
