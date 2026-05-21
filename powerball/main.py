@@ -2,18 +2,18 @@ from ascii_art import logo
 from random import sample, randint
 
 PRIZES = {
-    (5, True): "Jackpot",
-    (5, False): "$1,000,000",
-    (4, True): "$50,000",
-    (4, False): "$100",
-    (3, True): "$100",
-    (3, False): "$7",
-    (2, True): "$7",
-    (2, False): "$0",
-    (1, True): "$4",
-    (1, False): "$0",
-    (0, True): "$4",
-    (0, False): "$0",
+    (5, True): 1000000000,  # Jackpot placeholder
+    (5, False): 1000000,
+    (4, True): 50000,
+    (4, False): 100,
+    (3, True): 100,
+    (3, False): 7,
+    (2, True): 7,
+    (2, False): 0,
+    (1, True): 4,
+    (1, False): 0,
+    (0, True): 4,
+    (0, False): 0,
 }
 
 # Function Definition
@@ -78,16 +78,18 @@ def get_single_number(message, from_num, to_num):
         if number is None:
             print_message("Please enter a single number!")
         elif not num_is_between(number, from_num, to_num):
-            print_message(f"Please select numbers from {from_num} to {to_num}!")
+            print_message(f"Please select numbers from {from_num} to {to_num:,}!")
         else:
             return number
 
 
 def print_fee(attempts, cost=2):
+    total_cost = attempts * cost
     print_message(
-        f"It costs ${attempts*cost} to play for {attempts} time{'s' if attempts != 1 else ''}, "
+        f"It costs ${total_cost:,} to play for {attempts} time{'s' if attempts != 1 else ''}, "
         "But don't worry, I'm sure you'll win it all back."
     )
+    return total_cost
 
 
 def white_balls_lottery():
@@ -109,8 +111,23 @@ def play_powerball(user_white_balls, user_powerball):
 
     white_balls_str = ", ".join(map(str, sorted(winning_white_balls)))
     print(
-        f"The winning numbers are: {white_balls_str:<20} Powerball: {winning_powerball:<5} Prize: {prize:<15}"
+        f"The winning numbers are: {white_balls_str:<20} Powerball: {winning_powerball:<5} Prize: ${prize:<15,}"
     )
+    return prize
+
+
+def end_game_mesage(total_cost, prize):
+    prize_won = sum(prize)
+    profit = prize_won - total_cost
+    if prize_won == 0:
+        print_message(f"You've wasted your ${total_cost:,} :(")
+    elif profit < 0:
+        print_message(f"You've lost ${-profit:,}, but not all your money :|")
+    else:
+        print_message(
+            f"Congrats! You've won ${prize_won:,} and got a profit of ${profit:,} :)"
+        )
+    print("Thanks for playing! See, you again :D\n")
 
 
 # Driver Code
@@ -119,8 +136,9 @@ print(logo)
 white_balls = get_white_balls()
 powerball = get_single_number("Enter Powerball number from 1 to 26", 1, 26)
 attempts = get_single_number(
-    "How many times do you want to play? (Max: 1000000)", 1, 1000000
+    f"How many times do you want to play? (Max: {1000000:,})", 1, 1000000
 )
-print_fee(attempts)
-for _ in range(attempts):
-    prize = play_powerball(white_balls, powerball)
+total_cost = print_fee(attempts)
+input("Press Enter to begin...")
+prizes = [play_powerball(white_balls, powerball) for p in range(attempts)]
+end_game_mesage(total_cost, prizes)
