@@ -165,7 +165,6 @@ def start_round():
             max_attempts,
         )
         total_cost = calculate_fee(attempts)
-        game_state["amount_lost"] += total_cost
         print_fee(attempts, total_cost)
         proceed = get_input(
             "Press Enter to begin or 'r' to re-enter attempts..."
@@ -173,6 +172,7 @@ def start_round():
         if proceed == "r":
             print_message("Reverting...")
             continue
+        game_state["amount_lost"] += total_cost
         return attempts, total_cost
 
 
