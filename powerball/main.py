@@ -80,7 +80,7 @@ def get_white_balls():
         elif not check_white_balls(numbers):
             print_message("Please select numbers from 1 to 69!")
         else:
-            return set(numbers)
+            return numbers
 
 
 def num_is_between(num_to_check, from_num, to_num):
@@ -107,10 +107,10 @@ def draw_powerball():
 
 
 def play_powerball(user_white_balls, user_powerball):
-    winning_white_balls = set(draw_white_balls())
+    winning_white_balls = draw_white_balls()
     winning_powerball = draw_powerball()
 
-    white_matches = len((user_white_balls & winning_white_balls))
+    white_matches = len((set(user_white_balls) & set(winning_white_balls)))
     powerball_match = user_powerball == winning_powerball
 
     prize = PRIZES[(white_matches, powerball_match)]
@@ -157,7 +157,7 @@ def calculate_fee(attempts, cost=game_state["cost_per_attempt"]):
 
 def print_fee(attempts, total_cost):
     print_message(
-        f"It costs ${total_cost} to play for {attempts} time{'s' if attempts != 1 else ''}, "
+        f"It costs ${total_cost:,} to play for {attempts} time{'s' if attempts != 1 else ''}, "
         "But don't worry, I'm sure you'll win it all back."
     )
 
@@ -212,7 +212,7 @@ def continue_to_play():
 
 print(logo)
 game_state["initial_amount"] = get_single_number(
-    "Welcome Player!\n How much are you willing to bet?",
+    "Welcome Player!\n\tHow much money would you like to start with?",
     game_state["cost_per_attempt"],
     1_000,
 )
