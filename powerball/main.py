@@ -189,9 +189,9 @@ def can_play_game():
 
 
 def print_user_funds():
-    print("\t |", end="")
+    print("\tFunds Status: ", end="")
     for txt, key in user_funds:
-        print(f"{txt}: ${game_state[key]:,} ", end="| ")
+        print(f"{txt}: ${game_state[key]:,}", end=" | ")
     print("\n")
 
 
@@ -204,13 +204,12 @@ def powerball_app():
     game_state["attempts"] += attempts
 
 
-def run_game():
-    while can_play_game():
-        powerball_app()
-        calculate_total_amount()
-        print_user_funds()
-    print_message(f"Total_Attempts: {game_state['attempts']}")
-    print("Sadly you're out of funds!...See you again...")
+def continue_to_play():
+    proceed = get_input("Would you like to play again? (y/n)").lower()
+    if proceed == "y":
+        print_message("Goodbye, hope to see you again...")
+        quit()
+    print_message("All the best for your next game!")
 
 
 # Driver Code
@@ -220,4 +219,10 @@ print_message(
     f"Welcome player! You've been given ${game_state['initial_amount']} to play Powerball!"
 )
 calculate_total_amount()
-run_game()
+while can_play_game():
+    powerball_app()
+    calculate_total_amount()
+    print_user_funds()
+    continue_to_play()
+print_message(f"Total_Attempts: {game_state['attempts']}")
+print("Sadly you're out of funds!...See you again...")
