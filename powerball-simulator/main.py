@@ -16,6 +16,15 @@ PRIZES = {
     (0, False): 0,
 }
 
+game_state = {
+    "cost_per_attempt": 2,
+    "initial_amount": 0,
+    "max_initial_amount": 1000,
+    "attempts": 0,
+    "amount_earned": 0,
+    "amount_lost": 0,
+}
+
 # Function Definition
 
 
@@ -65,7 +74,7 @@ def get_white_balls():
         elif not check_white_balls(numbers):
             print_message("Please select numbers from 1 to 69!")
         else:
-            return set(numbers)
+            return numbers
 
 
 def num_is_between(num_to_check, from_num, to_num):
@@ -83,15 +92,6 @@ def get_single_number(message, from_num, to_num):
             return number
 
 
-def print_fee(attempts, cost=2):
-    total_cost = attempts * cost
-    print_message(
-        f"It costs ${total_cost:,} to play for {attempts} time{'s' if attempts != 1 else ''}, "
-        "But don't worry, I'm sure you'll win it all back."
-    )
-    return total_cost
-
-
 def draw_white_balls():
     return sample(range(1, 70), k=5)
 
@@ -101,10 +101,10 @@ def draw_powerball():
 
 
 def play_powerball(user_white_balls, user_powerball):
-    winning_white_balls = set(draw_white_balls())
+    winning_white_balls = draw_white_balls()
     winning_powerball = draw_powerball()
 
-    white_matches = len((user_white_balls & winning_white_balls))
+    white_matches = len((set(user_white_balls) & set(winning_white_balls)))
     powerball_match = user_powerball == winning_powerball
 
     prize = PRIZES[(white_matches, powerball_match)]
@@ -118,27 +118,111 @@ def play_powerball(user_white_balls, user_powerball):
     return prize
 
 
-def end_game_message(total_cost, prize):
+def end_round_message(total_cost, prize):
     total_winnings = sum(prize)
     profit = total_winnings - total_cost
     if total_winnings == 0:
-        print_message(f"You've wasted your ${total_cost:,} :(")
+        print_message(f"You've wasted your ${total_cost:,} this round :(")
     elif profit < 0:
-        print_message(f"You've lost ${-profit:,}, but not all your money :|")
+        print_message(f"You've lost ${-profit:,} this round, but not all your money :|")
     else:
         print_message(
             f"Congrats! You've won ${total_winnings:,} and got a profit of ${profit:,} :)"
         )
-    print("Thanks for playing! See, you again :D\n")
+    game_state["amount_earned"] += total_winnings
+
+
+def possible_attempts():
+    return calculate_total_amount() // game_state["cost_per_attempt"]
+
+
+def calculate_total_amount():
+    return (
+        game_state["initial_amount"]
+        + game_state["amount_earned"]
+        - game_state["amount_lost"]
+    )
+
+
+def calculate_fee(attempts, cost=game_state["cost_per_attempt"]):
+    total_cost = attempts * cost
+    return total_cost
+
+
+def print_fee(attempts, total_cost):
+    print_message(
+        f"It costs ${total_cost:,} to play for {attempts} time{'s' if attempts != 1 else ''}, "
+        "But don't worry, I'm sure you'll win it all back."
+    )
+
+
+def start_round():
+    while True:
+        max_attempts = possible_attempts()
+        attempts = get_single_number(
+            f"How many times do you want to play? (Max: {max_attempts})",
+            1,
+            max_attempts,
+        )
+        total_cost = calculate_fee(attempts)
+        print_fee(attempts, total_cost)
+        proceed = get_input(
+            "Press Enter to begin or 'r' to re-enter attempts..."
+        ).lower()
+        if proceed == "r":
+            print_message("Reverting...")
+            continue
+        game_state["amount_lost"] += total_cost
+        return attempts, total_cost
+
+
+def can_play_game():
+    return calculate_total_amount() >= game_state["cost_per_attempt"]
+
+
+def print_user_funds():
+    print_message(f"""
+    {'Funds Status'.center(20, "-")}
+    Amount Earned: ${game_state['amount_earned']:,}
+    Amount Lost:   ${game_state['amount_lost']:,}
+    Balance:       ${calculate_total_amount():,}
+    """)
+
+
+def powerball_app():
+    white_balls = get_white_balls()
+    powerball = get_single_number("Enter Powerball number from 1 to 26", 1, 26)
+    attempts, total_cost = start_round()
+    prizes = [play_powerball(white_balls, powerball) for _ in range(attempts)]
+    end_round_message(total_cost, prizes)
+    game_state["attempts"] += attempts
+
+
+def continue_to_play():
+    proceed = get_input("Would you like to play again? (y/n)").lower()
+    if proceed != "y":
+        print_message("Goodbye, hope to see you again...")
+        quit()
 
 
 # Driver Code
 
 print(logo)
-white_balls = get_white_balls()
-powerball = get_single_number("Enter Powerball number from 1 to 26", 1, 26)
-attempts = get_single_number("How many times do you want to play? (Max: 100)", 1, 100)
-total_cost = print_fee(attempts)
-input("Press Enter to begin...")
-prizes = [play_powerball(white_balls, powerball) for _ in range(attempts)]
-end_game_message(total_cost, prizes)
+game_state["initial_amount"] = get_single_number(
+    f"Welcome Player!\n How much money would you like to start with? (Enter between ${game_state['cost_per_attempt']} to ${game_state['max_initial_amount']})",
+    game_state["cost_per_attempt"],
+    game_state["max_initial_amount"],
+)
+print_message(f"Balance of ${game_state['initial_amount']} added!")
+while can_play_game():
+    powerball_app()
+    print_user_funds()
+    continue_to_play()
+
+print_message("Sadly, you're out of funds!")
+see_attempts = get_input(
+    "Would you like to see your number of attempts for powerball? (y/n)"
+)
+if see_attempts == "y":
+    print_message(f"Total_Attempts: {game_state['attempts']}")
+print("See you again...")
