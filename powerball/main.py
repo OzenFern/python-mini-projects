@@ -18,7 +18,7 @@ PRIZES = {
 
 app_state = {
     "cost_per_attempt": 2,
-    "initial_amount": 100,
+    "initial_amount": 200,
     "atempts": 0,
     "amount_earned": 0,
     "amount_lost": 0,
@@ -92,15 +92,6 @@ def get_single_number(message, from_num, to_num):
             return number
 
 
-def print_fee(attempts, cost=2):
-    total_cost = attempts * cost
-    print_message(
-        f"It costs ${total_cost:,} to play for {attempts} time{'s' if attempts != 1 else ''}, "
-        "But don't worry, I'm sure you'll win it all back."
-    )
-    return total_cost
-
-
 def draw_white_balls():
     return sample(range(1, 70), k=5)
 
@@ -157,7 +148,8 @@ def calculate_fee(attempts, cost=app_state["cost_per_attempt"]):
 
 def print_fee(attempts, total_cost):
     print_message(
-        f"It costs ${total_cost} to play for {attempts} time{'s' if attempts != 1 else ''}"
+        f"It costs ${total_cost} to play for {attempts} time{'s' if attempts != 1 else ''}, "
+        "But don't worry, I'm sure you'll win it all back."
     )
 
 
