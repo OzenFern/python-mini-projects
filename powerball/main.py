@@ -78,7 +78,7 @@ def get_single_number(message, from_num, to_num):
         if number is None:
             print_message("Please enter a single number!")
         elif not num_is_between(number, from_num, to_num):
-            print_message(f"Please select numbers from {from_num} to {to_num:,}!")
+            print_message(f"Please select numbers from {from_num} to {to_num}!")
         else:
             return number
 
