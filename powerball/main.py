@@ -18,7 +18,7 @@ PRIZES = {
 
 game_state = {
     "cost_per_attempt": 2,
-    "initial_amount": 200,
+    "initial_amount": 00,
     "attempts": 0,
     "amount_earned": 0,
     "amount_lost": 0,
@@ -218,9 +218,10 @@ def continue_to_play():
 # Driver Code
 
 print(logo)
-print_message(
-    f"Welcome player! You've been given ${game_state['initial_amount']} to play Powerball!"
+game_state["initial_amount"] = get_single_number(
+    "Welcome Player!\n How much are you willing to bet?", 2, 1_000
 )
+print_message(f"You've decided to bet ${game_state['initial_amount']} on Powerball!")
 calculate_total_amount()
 while can_play_game():
     powerball_app()
