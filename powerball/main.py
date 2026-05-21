@@ -16,14 +16,20 @@ PRIZES = {
     (0, False): 0,
 }
 
-app_state = {
+game_state = {
     "cost_per_attempt": 2,
     "initial_amount": 200,
-    "atempts": 0,
+    "attempts": 0,
     "amount_earned": 0,
     "amount_lost": 0,
     "total_amount": 0,
 }
+
+user_funds = (
+    ("Amount Earned", "amount_earned"),
+    ("Amount Lost", "amount_lost"),
+    ("Balance", "total_amount"),
+)
 
 # Function Definition
 
@@ -87,7 +93,7 @@ def get_single_number(message, from_num, to_num):
         if number is None:
             print_message("Please enter a single number!")
         elif not num_is_between(number, from_num, to_num):
-            print_message(f"Please select numbers from {from_num} to {to_num:,}!")
+            print_message(f"Please select numbers from {from_num} to {to_num}!")
         else:
             return number
 
@@ -118,7 +124,7 @@ def play_powerball(user_white_balls, user_powerball):
     return prize
 
 
-def end_game_message(total_cost, prize):
+def end_round_message(total_cost, prize):
     total_winnings = sum(prize)
     profit = total_winnings - total_cost
     if total_winnings == 0:
@@ -129,20 +135,20 @@ def end_game_message(total_cost, prize):
         print_message(
             f"Congrats! You've won ${total_winnings:,} and got a profit of ${profit:,} :)"
         )
-    print("Thanks for playing! See, you again :D\n")
+    game_state["amount_earned"] += total_winnings
 
 
 def calculate_total_amount():
-    app_state["total_amount"] += (
-        app_state["initial_amount"]
-        + app_state["amount_earned"]
-        - app_state["amount_lost"]
+    game_state["total_amount"] += (
+        game_state["initial_amount"]
+        + game_state["amount_earned"]
+        - game_state["amount_lost"]
     )
 
 
-def calculate_fee(attempts, cost=app_state["cost_per_attempt"]):
+def calculate_fee(attempts, cost=game_state["cost_per_attempt"]):
     total_cost = attempts * cost
-    app_state["amount_lost"] += total_cost
+    game_state["amount_lost"] += total_cost
     return total_cost
 
 
@@ -153,21 +159,65 @@ def print_fee(attempts, total_cost):
     )
 
 
+def can_play_round(total_cost):
+    return total_cost < game_state["total_amount"]
+
+
+def start_round():
+    while True:
+        attempts = get_single_number(
+            "How many times do you want to play? (Max: 100)", 1, 100
+        )
+        total_cost = calculate_fee(attempts)
+        print_fee(attempts, total_cost)
+        proceed = get_input("Press Enter to begin or 'r' to re-enter tries").lower()
+        if proceed == "r":
+            print_message("Reverting...")
+            continue
+        if can_play_round(total_cost):
+            game_state["amount_lost"] += total_cost
+        else:
+            print_message(
+                f"You have insufficient funds to play for {attempts} attempts!"
+            )
+            continue
+        return attempts, total_cost
+
+
+def can_play_game():
+    return game_state["total_amount"] > game_state["cost_per_attempt"]
+
+
+def print_user_funds():
+    print("\t |", end="")
+    for txt, key in user_funds:
+        print(f"{txt}: ${game_state[key]:,} ", end="| ")
+    print("\n")
+
+
+def powerball_app():
+    white_balls = get_white_balls()
+    powerball = get_single_number("Enter Powerball number from 1 to 26", 1, 26)
+    attempts, total_cost = start_round()
+    prizes = [play_powerball(white_balls, powerball) for _ in range(attempts)]
+    end_round_message(total_cost, prizes)
+    game_state["attempts"] += attempts
+
+
+def run_game():
+    while can_play_game():
+        powerball_app()
+        calculate_total_amount()
+        print_user_funds()
+    print_message(f"Total_Attempts: {game_state['attempts']}")
+    print("Sadly you're out of funds!...See you again...")
+
+
 # Driver Code
 
 print(logo)
 print_message(
-    f"Welcome player! You've been given ${app_state['initial_amount']} to play Powerball!"
+    f"Welcome player! You've been given ${game_state['initial_amount']} to play Powerball!"
 )
-white_balls = get_white_balls()
-powerball = get_single_number("Enter Powerball number from 1 to 26", 1, 26)
-attempts = get_single_number("How many times do you want to play? (Max: 100)", 1, 100)
-total_cost = calculate_fee(attempts)
-print_fee(attempts, total_cost)
-input("Press Enter to begin...")
-prizes = [play_powerball(white_balls, powerball) for _ in range(attempts)]
-end_game_message(total_cost, prizes)
-attempts = get_single_number("How many times do you want to play? (Max: 100)", 1, 100)
-app_state["atempts"] += attempts
-total_cost = calculate_fee(attempts)
-print_fee(attempts, total_cost)
+calculate_total_amount()
+run_game()
