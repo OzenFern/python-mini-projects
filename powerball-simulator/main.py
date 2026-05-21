@@ -167,7 +167,7 @@ def start_round():
         total_cost = calculate_fee(attempts)
         print_fee(attempts, total_cost)
         proceed = get_input(
-            "Press Enter to begin or 'r' to re-enter attempts..."
+            "Press Enter to begin or type 'r' to re-enter attempts..."
         ).lower()
         if proceed == "r":
             print_message("Reverting...")
