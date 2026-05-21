@@ -219,7 +219,7 @@ while can_play_game():
     print_user_funds()
     continue_to_play()
 
-print("Sadly you're out of funds!...")
+print_message("Sadly, you're out of funds!")
 see_attempts = get_input(
     "Would you like to see your number of attempts for powerball? (y/n)"
 )
