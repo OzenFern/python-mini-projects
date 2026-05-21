@@ -128,14 +128,18 @@ def end_round_message(total_cost, prize):
     total_winnings = sum(prize)
     profit = total_winnings - total_cost
     if total_winnings == 0:
-        print_message(f"You've wasted your ${total_cost:,} :(")
+        print_message(f"You've wasted your ${total_cost:,} this round :(")
     elif profit < 0:
-        print_message(f"You've lost ${-profit:,}, but not all your money :|")
+        print_message(f"You've lost ${-profit:,} this round, but not all your money :|")
     else:
         print_message(
             f"Congrats! You've won ${total_winnings:,} and got a profit of ${profit:,} :)"
         )
     game_state["amount_earned"] += total_winnings
+
+
+def possible_attempts():
+    return game_state["total_amount"] // 2
 
 
 def calculate_total_amount():
@@ -158,14 +162,13 @@ def print_fee(attempts, total_cost):
     )
 
 
-def can_play_round(total_cost):
-    return total_cost < game_state["total_amount"]
-
-
 def start_round():
     while True:
+        max_attempts = possible_attempts()
         attempts = get_single_number(
-            "How many times do you want to play? (Max: 100)", 1, 100
+            f"How many times do you want to play? (Max: {max_attempts})",
+            1,
+            max_attempts,
         )
         total_cost = calculate_fee(attempts)
         print_fee(attempts, total_cost)
@@ -175,7 +178,7 @@ def start_round():
         if proceed == "r":
             print_message("Reverting...")
             continue
-        if can_play_round(total_cost):
+        if attempts <= max_attempts:
             game_state["amount_lost"] += total_cost
         else:
             print_message(
@@ -210,7 +213,6 @@ def continue_to_play():
     if proceed != "y":
         print_message("Goodbye, hope to see you again...")
         quit()
-    print_message("All the best for your next game!")
 
 
 # Driver Code
@@ -225,5 +227,11 @@ while can_play_game():
     calculate_total_amount()
     print_user_funds()
     continue_to_play()
-print_message(f"Total_Attempts: {game_state['attempts']}")
-print("Sadly you're out of funds!...See you again...")
+
+print("Sadly you're out of funds!...")
+see_attempts = get_input(
+    "Would you like to see your number of attempts for powerball? (y/n)"
+)
+if see_attempts == "y":
+    print_message(f"Total_Attempts: {game_state['attempts']}")
+print("See you again...")
