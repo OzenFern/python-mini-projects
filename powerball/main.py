@@ -92,40 +92,42 @@ def print_fee(attempts, cost=2):
     return total_cost
 
 
-def white_balls_lottery():
+def draw_white_balls():
     return sample(range(1, 70), k=5)
 
 
-def powerball_lottery():
+def draw_powerball():
     return randint(1, 26)
 
 
 def play_powerball(user_white_balls, user_powerball):
-    winning_white_balls = set(white_balls_lottery())
-    winning_powerball = powerball_lottery()
+    winning_white_balls = set(draw_white_balls())
+    winning_powerball = draw_powerball()
 
     white_matches = len((user_white_balls & winning_white_balls))
     powerball_match = user_powerball == winning_powerball
 
     prize = PRIZES[(white_matches, powerball_match)]
 
+    prize_text = "No win" if prize == 0 else f"{prize:,}"
+
     white_balls_str = ", ".join(map(str, sorted(winning_white_balls)))
     print(
-        f"The winning numbers are: {white_balls_str:<20} Powerball: {winning_powerball:<5} Prize: ${prize:<15,}"
+        f"The winning numbers are: {white_balls_str:<20} Powerball: {winning_powerball:<5} Prize: ${prize_text:<15}"
     )
     return prize
 
 
-def end_game_mesage(total_cost, prize):
-    prize_won = sum(prize)
-    profit = prize_won - total_cost
-    if prize_won == 0:
+def end_game_message(total_cost, prize):
+    total_winnings = sum(prize)
+    profit = total_winnings - total_cost
+    if total_winnings == 0:
         print_message(f"You've wasted your ${total_cost:,} :(")
     elif profit < 0:
         print_message(f"You've lost ${-profit:,}, but not all your money :|")
     else:
         print_message(
-            f"Congrats! You've won ${prize_won:,} and got a profit of ${profit:,} :)"
+            f"Congrats! You've won ${total_winnings:,} and got a profit of ${profit:,} :)"
         )
     print("Thanks for playing! See, you again :D\n")
 
@@ -140,5 +142,5 @@ attempts = get_single_number(
 )
 total_cost = print_fee(attempts)
 input("Press Enter to begin...")
-prizes = [play_powerball(white_balls, powerball) for p in range(attempts)]
-end_game_mesage(total_cost, prizes)
+prizes = [play_powerball(white_balls, powerball) for _ in range(attempts)]
+end_game_message(total_cost, prizes)
