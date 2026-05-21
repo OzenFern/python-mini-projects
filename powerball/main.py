@@ -214,7 +214,6 @@ game_state["initial_amount"] = get_single_number(
     game_state["max_initial_amount"],
 )
 print_message(f"Balance of ${game_state['initial_amount']} added!")
-calculate_total_amount()
 while can_play_game():
     powerball_app()
     print_user_funds()
