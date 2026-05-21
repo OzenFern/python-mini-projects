@@ -109,11 +109,11 @@ def play_powerball(user_white_balls, user_powerball):
 
     prize = PRIZES[(white_matches, powerball_match)]
 
-    prize_text = "No win" if prize == 0 else f"{prize:,}"
+    prize_text = "No win" if prize == 0 else f"${prize:,}"
 
     white_balls_str = ", ".join(map(str, sorted(winning_white_balls)))
     print(
-        f"The winning numbers are: {white_balls_str:<20} Powerball: {winning_powerball:<5} Prize: ${prize_text:<15}"
+        f"The winning numbers are: {white_balls_str:<20} Powerball: {winning_powerball:<5} Prize: {prize_text:<15}"
     )
     return prize
 
@@ -137,9 +137,7 @@ def end_game_message(total_cost, prize):
 print(logo)
 white_balls = get_white_balls()
 powerball = get_single_number("Enter Powerball number from 1 to 26", 1, 26)
-attempts = get_single_number(
-    f"How many times do you want to play? (Max: {1000000:,})", 1, 1000000
-)
+attempts = get_single_number("How many times do you want to play? (Max: 100)", 1, 100)
 total_cost = print_fee(attempts)
 input("Press Enter to begin...")
 prizes = [play_powerball(white_balls, powerball) for _ in range(attempts)]
