@@ -4,7 +4,6 @@ import bext, random, sys
 # Make width & height dynamic
 # Dynamic moves per game
 # Add difficulty levels
-# Add bg("Black") in driver instead of function
 # Add a cap to intensity
 # Use colours list to join and print
 
@@ -55,16 +54,11 @@ def smear_colours(board: dict, intensity: int = 1) -> dict:
     return board
 
 
-def default_colours():
-    bext.fg("white")
-    bext.bg("black")
-
-
 def display_board(board: dict):
     """Display colourful board"""
 
     # Draw the top horizontal line
-    default_colours()
+    bext.fg("white")
     print(
         game_state["top_left"]
         + game_state["line"] * game_state["width"]
@@ -73,7 +67,7 @@ def display_board(board: dict):
 
     # Draw vertical lines + blocks
     for y in range(game_state["height"]):
-        default_colours()
+        bext.fg("white")
         if y == 0:
             print(">", end="")
         else:
@@ -83,11 +77,11 @@ def display_board(board: dict):
             print(game_state["block"], end="")
 
         # Print the ending vertical line
-        default_colours()
+        bext.fg("white")
         print(game_state["pipe"])
 
     # Draw the bottom horizontal line
-    default_colours()
+    bext.fg("white")
     print(
         game_state["bottom_left"]
         + game_state["line"] * game_state["width"]
@@ -159,6 +153,7 @@ def exit_game() -> None:
 
 
 # Driver
+bext.bg("black")
 moves_left = game_state["moves_per_game"]
 new_board = get_new_board()
 board = smear_colours(new_board)
