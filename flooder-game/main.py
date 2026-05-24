@@ -5,6 +5,7 @@ import bext, random, sys
 # Dynamic moves per game
 # Add difficulty levels
 # Add bg("Black") in driver instead of function
+# Add a cap to intensity
 
 game_state: dict = {
     "tile_colours": {
@@ -38,9 +39,12 @@ def get_new_board() -> dict:
     return board
 
 
-def smear_colours(board: dict, level: int = 1) -> dict:
-    """Smear the colours vertically, by making two neighbouring blocks the same color"""
-    for _ in range(0, game_state["width"] * game_state["height"], level):
+def smear_colours(board: dict, intensity: int = 1) -> dict:
+    """
+    Smear the colours vertically, by making two neighbouring blocks the same color.
+    More intensity leads to more smearing.
+    """
+    for _ in range(game_state["width"] * game_state["height"] * intensity):
         x = random.randrange(0, game_state["width"])
         y = random.randrange(1, game_state["height"])
         board[(x, y - 1)] = board[(x, y)]
