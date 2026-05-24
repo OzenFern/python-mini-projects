@@ -5,20 +5,15 @@ import bext, random, sys
 # Dynamic moves per game
 # Add difficulty levels
 # Add a cap to intensity
+# Make intensity a dictionary value
+# Make board global or add multiple boards for diffculty
+
+
+game_state: dict[str, int] = {"width": 14, "height": 12, "moves": 20, "intensity": 1}
 
 # Constants
-game_state: dict = {
-    "tile_colours": {
-        "R": "red",
-        "G": "green",
-        "B": "blue",
-        "P": "purple",
-        "Y": "yellow",
-        "C": "cyan",
-    },
-    "width": 20,
-    "height": 12,
-    "moves": 20,
+
+board_box: dict[str, str] = {
     "line": chr(9472),
     "pipe": chr(9474),
     "bottom_left": chr(9492),
@@ -27,9 +22,23 @@ game_state: dict = {
     "top_right": chr(9488),
     "block": chr(9608),
 }
-COLOUR_NAMES = list(game_state["tile_colours"].values())
 
-DIRECTIONS = ((-1, 0), (0, 1), (0, -1), (1, 0))
+TILE_COLOURS: dict[str, str] = {
+    "R": "red",
+    "G": "green",
+    "B": "blue",
+    "P": "purple",
+    "Y": "yellow",
+    "C": "cyan",
+}
+
+COLOUR_NAMES: tuple[str, ...] = tuple(TILE_COLOURS.values())
+DIRECTIONS: tuple = ((-1, 0), (0, 1), (0, -1), (1, 0))
+
+# Board Typing Hints
+
+Coordinate = tuple[int, int]
+Board = dict[Coordinate, str]
 
 # Function Definition
 
@@ -41,36 +50,38 @@ def clear_terminal() -> None:
     print("\033c", end="")
 
 
-def get_new_board() -> dict:
+def get_new_board() -> Board:
     """Creates a new board"""
-    board = {}
+    board: Board = {}
     for x in range(game_state["width"]):
         for y in range(game_state["height"]):
             board[(x, y)] = random.choice(COLOUR_NAMES)
     return board
 
 
-def smear_colours(board: dict, intensity: int = 20) -> dict:
+def smear_colours(board: Board) -> Board:
     """
     Smear the colours vertically, by making two neighbouring blocks the same color.
     More intensity leads to more smearing.
     """
-    for _ in range(game_state["width"] * game_state["height"] * intensity):
+    for _ in range(
+        game_state["width"] * game_state["height"] * game_state["intensity"]
+    ):
         x = random.randrange(0, game_state["width"])
         y = random.randrange(1, game_state["height"])
         board[(x, y - 1)] = board[(x, y)]
     return board
 
 
-def display_board(board: dict):
+def display_board(board: Board):
     """Display colourful board"""
 
     # Draw the top horizontal line
     bext.fg("white")
     print(
-        game_state["top_left"]
-        + game_state["line"] * game_state["width"]
-        + game_state["top_right"]
+        board_box["top_left"]
+        + board_box["line"] * game_state["width"]
+        + board_box["top_right"]
     )
 
     # Draw vertical lines + blocks
@@ -79,21 +90,21 @@ def display_board(board: dict):
         if y == 0:
             print(">", end="")
         else:
-            print(game_state["pipe"], end="")
+            print(board_box["pipe"], end="")
         for x in range(game_state["width"]):
             bext.fg(board[(x, y)])
-            print(game_state["block"], end="")
+            print(board_box["block"], end="")
 
         # Print the ending vertical line
         bext.fg("white")
-        print(game_state["pipe"])
+        print(board_box["pipe"])
 
     # Draw the bottom horizontal line
     bext.fg("white")
     print(
-        game_state["bottom_left"]
-        + game_state["line"] * game_state["width"]
-        + game_state["bottom_right"]
+        board_box["bottom_left"]
+        + board_box["line"] * game_state["width"]
+        + board_box["bottom_right"]
     )
 
 
@@ -106,32 +117,38 @@ def ask_player_for_colour() -> str:
         for colour in COLOUR_NAMES:
             bext.fg(colour)
             print(f"({colour[0].upper()}){colour[1:]}", end=", ")
-        choice = input("(Q)uit: ").upper()
+        choice: str = input("(Q)uit: ").upper()
 
         if choice == "Q":
             exit_game()
-        elif choice in game_state["tile_colours"]:
-            return game_state["tile_colours"][choice]
+        elif choice in TILE_COLOURS:
+            return TILE_COLOURS[choice]
         else:
             print(
                 "Invalid choice. Please select the first letter of the colour you want to apply..."
             )
 
 
-def apply_colour(board: dict, user_colour: str) -> None:
+def apply_colour(board: Board, user_colour: str) -> None:
     """
-    Apply colours based on user input
+    Apply colours based on user input and decrement moves when a valid move is played
     """
-    original_colour = board[(0, 0)]
+    original_colour: str = board[(0, 0)]
 
     if original_colour == user_colour:
         return
 
     _flood_fill(board, 0, 0, original_colour, user_colour)
 
+    decrement_moves()
+
 
 def _flood_fill(
-    board: dict, x: int, y: int, original_colour: str, new_colour: str
+    board: Board,
+    x: int,
+    y: int,
+    original_colour: str,
+    new_colour: str,
 ) -> None:
     """
     Recursive function to paint all neighbours having original_colour with new_colour
@@ -143,8 +160,8 @@ def _flood_fill(
     board[(x, y)] = new_colour
 
     for dx, dy in DIRECTIONS:
-        nx = x + dx
-        ny = y + dy
+        nx: int = x + dx
+        ny: int = y + dy
 
         if 0 <= nx < game_state["width"] and 0 <= ny < game_state["height"]:
             _flood_fill(board, nx, ny, original_colour, new_colour)
@@ -157,8 +174,8 @@ def decrement_moves() -> None:
         exit_game()
 
 
-def has_won(board: dict) -> bool:
-    colour = board[(0, 0)]
+def has_won(board: Board) -> bool:
+    colour: str = board[(0, 0)]
     for x in range(game_state["width"]):
         for y in range(game_state["height"]):
             if colour != board[(x, y)]:
@@ -185,13 +202,12 @@ def exit_game() -> None:
 # Driver
 clear_terminal()
 bext.bg("black")
-new_board = get_new_board()
-board = smear_colours(new_board)
+new_board: Board = get_new_board()
+board: Board = smear_colours(new_board)
 while True:
     display_board(board)
-    print(f"Moves left: {game_state["moves"]}")
-    colour = ask_player_for_colour()
+    print(f"Moves left: {game_state['moves']}")
+    colour: str = ask_player_for_colour()
     apply_colour(board, colour)
-    decrement_moves()
     interpret_win(board)
     clear_terminal()
