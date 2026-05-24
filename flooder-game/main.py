@@ -1,14 +1,6 @@
 import bext, random, sys
 from ascii_art import logo
 
-# TODO:
-# Make width & height dynamic
-# Dynamic moves per game
-# Add difficulty levels
-# Add a cap to intensity
-# Make intensity a dictionary value
-# Make board global or add multiple boards for diffculty
-
 # Typing Hints
 
 Coordinate = tuple[int, int]
@@ -67,9 +59,7 @@ game_state: State = {
     "colours": 6,
 }
 
-active_colours: Colours = tuple(random.sample(COLOUR_NAMES, k=game_state["colours"]))
-
-tile_colours: dict[str, str] = {colour[0].upper(): colour for colour in active_colours}
+tile_colours: dict[str, str] = {}
 
 # Function Definition
 
@@ -93,20 +83,31 @@ def set_difficulty() -> None:
     Asks user for difficulty and updates game_state to the desired difficulty
     """
     while True:
-        choice = get_input("Select difficulty (E)asy, (M)edium, (H)ard: ")
-        if choice == "E":
-            difficulty = "easy"
-        elif choice == "M":
-            difficulty = "medium"
-        elif choice == "H":
-            difficulty = "hard"
-        else:
-            print(
-                "Invaild Choice. Please select the first letter of your desired difficulty"
-            )
-            continue
-        print(f"You've chosen {difficulty.capitalize()} difficulty...!!")
-        return game_state.update(DIFFICULTIES[difficulty])
+        choice: str = get_input(
+            "Select difficulty (E)asy, (M)edium, (H)ard or Enter for Default: "
+        )
+        if not choice:
+            print("No difficulty selected, using default settings...")
+            return
+
+        mapping: dict[str, str] = {"E": "easy", "M": "medium", "H": "hard"}
+        if choice in mapping:
+            difficulty: str = mapping[choice]
+            print(f"You've chosen {difficulty.capitalize()} difficulty...!!")
+            return game_state.update(DIFFICULTIES[difficulty])
+        print(
+            "Invaild Choice. Please select the first letter of your desired difficulty..."
+        )
+
+
+def build_tile_colours() -> dict[str, str]:
+    """
+    Build the tile_colour dictionary based on current difficulty
+    """
+    return {
+        colour[0].upper(): colour
+        for colour in random.sample(COLOUR_NAMES, k=game_state["colours"])
+    }
 
 
 def get_new_board() -> Board:
@@ -131,7 +132,9 @@ def smear_colours(board: Board, intensity: int) -> Board:
 
 
 def display_board(board: Board):
-    """Display colourful board"""
+    """
+    Display colourful board
+    """
 
     # Draw the top horizontal line
     bext.fg("white")
@@ -166,12 +169,14 @@ def display_board(board: Board):
 
 
 def ask_player_for_colour() -> str:
-    """Controls which colour is applied at the top left tile"""
+    """
+    Controls which colour is applied at the top left tile
+    """
     while True:
         bext.fg("white")
         print("Choose one of ", end="")
 
-        for colour in COLOUR_NAMES:
+        for colour in tile_colours.values():
             bext.fg(colour)
             print(f"({colour[0].upper()}){colour[1:]}", end=", ")
         choice: str = get_input("(Q)uit: ")
@@ -261,6 +266,7 @@ clear_terminal()
 bext.bg("black")
 print(f"{logo}\n Welcome to Flooder Game...!!")
 set_difficulty()
+tile_colours = build_tile_colours()
 new_board: Board = get_new_board()
 board: Board = smear_colours(new_board, game_state["intensity"])
 while True:
