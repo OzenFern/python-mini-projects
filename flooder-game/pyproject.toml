@@ -1,0 +1,9 @@
+[project]
+name = "flooder-game"
+version = "1.1.5"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "bext>=0.1.1",
+]
