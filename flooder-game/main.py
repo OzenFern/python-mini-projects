@@ -5,7 +5,6 @@ import bext, random, sys
 # Dynamic moves per game
 # Add difficulty levels
 # Add a cap to intensity
-# Use colours list to join and print
 
 # Constants
 game_state: dict = {
@@ -19,7 +18,7 @@ game_state: dict = {
     },
     "width": 20,
     "height": 12,
-    "moves_per_game": 20,
+    "moves": 20,
     "line": chr(9472),
     "pipe": chr(9474),
     "bottom_left": chr(9492),
@@ -32,6 +31,15 @@ COLOUR_NAMES = list(game_state["tile_colours"].values())
 
 DIRECTIONS = ((-1, 0), (0, 1), (0, -1), (1, 0))
 
+# Function Definition
+
+
+def clear_terminal() -> None:
+    """
+    Standard ANSI escape code to reset the terminal
+    """
+    print("\033c", end="")
+
 
 def get_new_board() -> dict:
     """Creates a new board"""
@@ -42,7 +50,7 @@ def get_new_board() -> dict:
     return board
 
 
-def smear_colours(board: dict, intensity: int = 1) -> dict:
+def smear_colours(board: dict, intensity: int = 20) -> dict:
     """
     Smear the colours vertically, by making two neighbouring blocks the same color.
     More intensity leads to more smearing.
@@ -142,6 +150,28 @@ def _flood_fill(
             _flood_fill(board, nx, ny, original_colour, new_colour)
 
 
+def decrement_moves() -> None:
+    game_state["moves"] -= 1
+    if game_state["moves"] == 0:
+        print("You have run out of moves...!!")
+        exit_game()
+
+
+def has_won(board: dict) -> bool:
+    colour = board[(0, 0)]
+    for x in range(game_state["width"]):
+        for y in range(game_state["height"]):
+            if colour != board[(x, y)]:
+                return False
+    return True
+
+
+def interpret_win(board) -> None:
+    if has_won(board):
+        print("Congratulation! You have won the game...!!")
+        exit_game()
+
+
 def exit_game() -> None:
     """Exits the game and resets the terminal colours to default"""
     try:
@@ -153,13 +183,15 @@ def exit_game() -> None:
 
 
 # Driver
+clear_terminal()
 bext.bg("black")
-moves_left = game_state["moves_per_game"]
 new_board = get_new_board()
 board = smear_colours(new_board)
 while True:
     display_board(board)
-    print(f"Moves left: {moves_left}")
+    print(f"Moves left: {game_state["moves"]}")
     colour = ask_player_for_colour()
     apply_colour(board, colour)
-    moves_left -= 1
+    decrement_moves()
+    interpret_win(board)
+    clear_terminal()
