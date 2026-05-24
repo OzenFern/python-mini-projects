@@ -1,4 +1,5 @@
 import bext, random, sys
+from ascii_art import logo
 
 # TODO:
 # Make width & height dynamic
@@ -8,12 +9,42 @@ import bext, random, sys
 # Make intensity a dictionary value
 # Make board global or add multiple boards for diffculty
 
+# Typing Hints
 
-game_state: dict[str, int] = {"width": 14, "height": 12, "moves": 20, "intensity": 1}
+Coordinate = tuple[int, int]
+Board = dict[Coordinate, str]
+
+State = dict[str, int]
+
+Colours = tuple[str, ...]
 
 # Constants
 
-board_box: dict[str, str] = {
+DIFFICULTIES: dict[str, State] = {
+    "easy": {
+        "width": 10,
+        "height": 8,
+        "moves": 22,
+        "intensity": 4,
+        "colours": 4,
+    },
+    "medium": {
+        "width": 14,
+        "height": 12,
+        "moves": 20,
+        "intensity": 2,
+        "colours": 5,
+    },
+    "hard": {
+        "width": 18,
+        "height": 15,
+        "moves": 17,
+        "intensity": 1,
+        "colours": 6,
+    },
+}
+
+BOARD_BOX: dict[str, str] = {
     "line": chr(9472),
     "pipe": chr(9474),
     "bottom_left": chr(9492),
@@ -23,22 +54,22 @@ board_box: dict[str, str] = {
     "block": chr(9608),
 }
 
-TILE_COLOURS: dict[str, str] = {
-    "R": "red",
-    "G": "green",
-    "B": "blue",
-    "P": "purple",
-    "Y": "yellow",
-    "C": "cyan",
-}
 
-COLOUR_NAMES: tuple[str, ...] = tuple(TILE_COLOURS.values())
+COLOUR_NAMES: Colours = ("red", "green", "blue", "purple", "yellow", "cyan")
 DIRECTIONS: tuple = ((-1, 0), (0, 1), (0, -1), (1, 0))
 
-# Board Typing Hints
+# Game variables derived during runtime
+game_state: State = {
+    "width": 14,
+    "height": 12,
+    "moves": 20,
+    "intensity": 1,
+    "colours": 6,
+}
 
-Coordinate = tuple[int, int]
-Board = dict[Coordinate, str]
+active_colours: Colours = tuple(random.sample(COLOUR_NAMES, k=game_state["colours"]))
+
+tile_colours: dict[str, str] = {colour[0].upper(): colour for colour in active_colours}
 
 # Function Definition
 
@@ -50,6 +81,34 @@ def clear_terminal() -> None:
     print("\033c", end="")
 
 
+def get_input(prompt: str) -> str:
+    """
+    Retruns a uppercase string with no whitespaces
+    """
+    return input(prompt).strip().upper()
+
+
+def set_difficulty() -> None:
+    """
+    Asks user for difficulty and updates game_state to the desired difficulty
+    """
+    while True:
+        choice = get_input("Select difficulty (E)asy, (M)edium, (H)ard: ")
+        if choice == "E":
+            difficulty = "easy"
+        elif choice == "M":
+            difficulty = "medium"
+        elif choice == "H":
+            difficulty = "hard"
+        else:
+            print(
+                "Invaild Choice. Please select the first letter of your desired difficulty"
+            )
+            continue
+        print(f"You've chosen {difficulty.capitalize()} difficulty...!!")
+        return game_state.update(DIFFICULTIES[difficulty])
+
+
 def get_new_board() -> Board:
     """Creates a new board"""
     board: Board = {}
@@ -59,14 +118,12 @@ def get_new_board() -> Board:
     return board
 
 
-def smear_colours(board: Board) -> Board:
+def smear_colours(board: Board, intensity: int) -> Board:
     """
     Smear the colours vertically, by making two neighbouring blocks the same color.
     More intensity leads to more smearing.
     """
-    for _ in range(
-        game_state["width"] * game_state["height"] * game_state["intensity"]
-    ):
+    for _ in range(game_state["width"] * game_state["height"] * intensity):
         x = random.randrange(0, game_state["width"])
         y = random.randrange(1, game_state["height"])
         board[(x, y - 1)] = board[(x, y)]
@@ -79,9 +136,9 @@ def display_board(board: Board):
     # Draw the top horizontal line
     bext.fg("white")
     print(
-        board_box["top_left"]
-        + board_box["line"] * game_state["width"]
-        + board_box["top_right"]
+        BOARD_BOX["top_left"]
+        + BOARD_BOX["line"] * game_state["width"]
+        + BOARD_BOX["top_right"]
     )
 
     # Draw vertical lines + blocks
@@ -90,21 +147,21 @@ def display_board(board: Board):
         if y == 0:
             print(">", end="")
         else:
-            print(board_box["pipe"], end="")
+            print(BOARD_BOX["pipe"], end="")
         for x in range(game_state["width"]):
             bext.fg(board[(x, y)])
-            print(board_box["block"], end="")
+            print(BOARD_BOX["block"], end="")
 
         # Print the ending vertical line
         bext.fg("white")
-        print(board_box["pipe"])
+        print(BOARD_BOX["pipe"])
 
     # Draw the bottom horizontal line
     bext.fg("white")
     print(
-        board_box["bottom_left"]
-        + board_box["line"] * game_state["width"]
-        + board_box["bottom_right"]
+        BOARD_BOX["bottom_left"]
+        + BOARD_BOX["line"] * game_state["width"]
+        + BOARD_BOX["bottom_right"]
     )
 
 
@@ -117,12 +174,12 @@ def ask_player_for_colour() -> str:
         for colour in COLOUR_NAMES:
             bext.fg(colour)
             print(f"({colour[0].upper()}){colour[1:]}", end=", ")
-        choice: str = input("(Q)uit: ").upper()
+        choice: str = get_input("(Q)uit: ")
 
         if choice == "Q":
             exit_game()
-        elif choice in TILE_COLOURS:
-            return TILE_COLOURS[choice]
+        elif choice in tile_colours:
+            return tile_colours[choice]
         else:
             print(
                 "Invalid choice. Please select the first letter of the colour you want to apply..."
@@ -202,8 +259,10 @@ def exit_game() -> None:
 # Driver
 clear_terminal()
 bext.bg("black")
+print(f"{logo}\n Welcome to Flooder Game...!!")
+set_difficulty()
 new_board: Board = get_new_board()
-board: Board = smear_colours(new_board)
+board: Board = smear_colours(new_board, game_state["intensity"])
 while True:
     display_board(board)
     print(f"Moves left: {game_state['moves']}")
