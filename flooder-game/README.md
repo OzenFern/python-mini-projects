@@ -185,3 +185,21 @@ This project helped reinforce concepts such as:
 - Boundary-safe traversal
 
 It also demonstrated how small practice projects can gradually evolve into larger structured applications through iterative refactoring and feature expansion.
+
+# Development Notes
+
+This project also marked my first time using uv for Python dependency and environment management.
+The project uses:
+
+- `pyproject.toml`
+- `uv.lock`
+- `.python-version`
+
+to maintain a reproducible development environment and modern Python workflow.
+During development, the project gradually evolved from a small recursion exercise into a more structured terminal game featuring:
+
+- recursive flood fill
+- dynamic game configuration
+- runtime-generated state
+- modular game architecture
+- type aliases and type hints
