@@ -8,6 +8,7 @@ import bext, random, sys
 # Add a cap to intensity
 # Use colours list to join and print
 
+# Constants
 game_state: dict = {
     "tile_colours": {
         "R": "red",
@@ -29,6 +30,8 @@ game_state: dict = {
     "block": chr(9608),
 }
 COLOUR_NAMES = list(game_state["tile_colours"].values())
+
+DIRECTIONS = ((-1, 0), (0, 1), (0, -1), (1, 0))
 
 
 def get_new_board() -> dict:
@@ -113,38 +116,36 @@ def ask_player_for_colour() -> str:
             )
 
 
-def apply_colour(
-    user_colour: str, board: dict, x: int, y: int, colour_to_change: str | None = None
-):
+def apply_colour(board: dict, user_colour: str) -> None:
     """
-    Apply selected colour to the adjacent tiles using recursive call
+    Apply colours based on user input
     """
-    # Set colour_to_change to the colour of the tile pointed by the cursor
-    if not any((x, y)):
-        colour_to_change = board[(x, y)]
+    original_colour = board[(0, 0)]
 
-    # If same colour exists then retrun
-    if user_colour == colour_to_change:
+    if original_colour == user_colour:
         return
 
-    # Assign the selected user_colour to the board
-    board[(x, y)] = user_colour
+    _flood_fill(board, 0, 0, original_colour, user_colour)
 
-    # Check for left neighbours
-    if x > 0 and board[(x - 1, y)] == colour_to_change:
-        apply_colour(user_colour, board, x - 1, y, colour_to_change)
 
-    # Check for right neighbours
-    if x < game_state["width"] - 1 and board[(x + 1, y)] == colour_to_change:
-        apply_colour(user_colour, board, x + 1, y, colour_to_change)
+def _flood_fill(
+    board: dict, x: int, y: int, original_colour: str, new_colour: str
+) -> None:
+    """
+    Recursive function to paint all neighbours having original_colour with new_colour
+    """
 
-    # Check for top neighbours
-    if y < game_state["height"] - 1 and board[(x, y + 1)] == colour_to_change:
-        apply_colour(user_colour, board, x, y + 1, colour_to_change)
+    if board[(x, y)] != original_colour:
+        return
 
-    # Check for bottom neighbours
-    if y > 0 and board[(x, y - 1)] == colour_to_change:
-        apply_colour(user_colour, board, x, y - 1, colour_to_change)
+    board[(x, y)] = new_colour
+
+    for dx, dy in DIRECTIONS:
+        nx = x + dx
+        ny = y + dy
+
+        if 0 <= nx < game_state["width"] and 0 <= ny < game_state["height"]:
+            _flood_fill(board, nx, ny, original_colour, new_colour)
 
 
 def exit_game() -> None:
@@ -165,5 +166,5 @@ while True:
     display_board(board)
     print(f"Moves left: {moves_left}")
     colour = ask_player_for_colour()
-    apply_colour(colour, board, 0, 0)
+    apply_colour(board, colour)
     moves_left -= 1
