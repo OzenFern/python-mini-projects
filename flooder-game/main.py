@@ -179,6 +179,7 @@ def ask_player_for_colour(tile_colours: TileColours) -> str:
         for colour in tile_colours.values():
             bext.fg(colour)
             print(f"({colour[0].upper()}){colour[1:]}", end=", ")
+        bext.fg("white")
         choice: str = get_input("(Q)uit: ")
 
         if choice == "Q":
