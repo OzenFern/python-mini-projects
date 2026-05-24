@@ -10,7 +10,7 @@ State = dict[str, int]
 
 Colours = tuple[str, ...]
 
-Tile_Colours = dict[str, str]
+TileColours = dict[str, str]
 # Constants
 
 DIFFICULTIES: dict[str, State] = {
@@ -49,7 +49,7 @@ BOARD_BOX: dict[str, str] = {
 
 
 COLOUR_NAMES: Colours = ("red", "green", "blue", "purple", "yellow", "cyan")
-DIRECTIONS: tuple = ((-1, 0), (0, 1), (0, -1), (1, 0))
+DIRECTIONS: tuple[Coordinate, ...] = ((-1, 0), (0, 1), (0, -1), (1, 0))
 
 # Game variables derived during runtime
 game_state: State = {
@@ -93,7 +93,8 @@ def set_difficulty() -> None:
         if choice in mapping:
             difficulty: str = mapping[choice]
             print(f"You've chosen {difficulty.capitalize()} difficulty...!!")
-            return game_state.update(DIFFICULTIES[difficulty])
+            game_state.update(DIFFICULTIES[difficulty])
+            break
         print(
             "Invaild Choice. Please select the first letter of your desired difficulty..."
         )
@@ -109,7 +110,7 @@ def build_tile_colours() -> dict[str, str]:
     }
 
 
-def get_new_board(tile_colours: Tile_Colours) -> Board:
+def get_new_board(tile_colours: TileColours) -> Board:
     """Creates a new board"""
     board: Board = {}
     for x in range(game_state["width"]):
@@ -167,7 +168,7 @@ def display_board(board: Board):
     )
 
 
-def ask_player_for_colour(tile_colours: Tile_Colours) -> str:
+def ask_player_for_colour(tile_colours: TileColours) -> str:
     """
     Controls which colour is applied at the top left tile
     """
