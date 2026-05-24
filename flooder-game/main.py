@@ -10,6 +10,7 @@ State = dict[str, int]
 
 Colours = tuple[str, ...]
 
+Tile_Colours = dict[str, str]
 # Constants
 
 DIFFICULTIES: dict[str, State] = {
@@ -58,8 +59,6 @@ game_state: State = {
     "intensity": 1,
     "colours": 6,
 }
-
-tile_colours: dict[str, str] = {}
 
 # Function Definition
 
@@ -110,12 +109,12 @@ def build_tile_colours() -> dict[str, str]:
     }
 
 
-def get_new_board() -> Board:
+def get_new_board(tile_colours: Tile_Colours) -> Board:
     """Creates a new board"""
     board: Board = {}
     for x in range(game_state["width"]):
         for y in range(game_state["height"]):
-            board[(x, y)] = random.choice(COLOUR_NAMES)
+            board[(x, y)] = random.choice(tuple(tile_colours.values()))
     return board
 
 
@@ -168,7 +167,7 @@ def display_board(board: Board):
     )
 
 
-def ask_player_for_colour() -> str:
+def ask_player_for_colour(tile_colours: Tile_Colours) -> str:
     """
     Controls which colour is applied at the top left tile
     """
@@ -267,12 +266,12 @@ bext.bg("black")
 print(f"{logo}\n Welcome to Flooder Game...!!")
 set_difficulty()
 tile_colours = build_tile_colours()
-new_board: Board = get_new_board()
+new_board: Board = get_new_board(tile_colours)
 board: Board = smear_colours(new_board, game_state["intensity"])
 while True:
     display_board(board)
     print(f"Moves left: {game_state['moves']}")
-    colour: str = ask_player_for_colour()
+    colour: str = ask_player_for_colour(tile_colours)
     apply_colour(board, colour)
     interpret_win(board)
     clear_terminal()
