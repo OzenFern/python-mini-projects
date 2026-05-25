@@ -239,11 +239,7 @@ def decrement_moves() -> None:
 
 def has_won(board: Board) -> bool:
     colour: str = board[(0, 0)]
-    for x in range(game_state["width"]):
-        for y in range(game_state["height"]):
-            if colour != board[(x, y)]:
-                return False
-    return True
+    return all(tile == colour for tile in board.values())
 
 
 def interpret_win(board) -> None:
