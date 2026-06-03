@@ -3,10 +3,12 @@ from ascii_art import logo
 
 # Typing Hints
 StrDict = dict[str, str]
-Rank = str | int
+Rank = str
 State = dict[str, int]
 CardMap = tuple[str, str, str, str, str]
-Card = tuple[Rank, str] | None
+Card = tuple[Rank, str]
+Deck = set[Card]
+Dealer = list[Card | None]
 
 # Constants
 SUITS: StrDict = {
@@ -14,7 +16,6 @@ SUITS: StrDict = {
     "club": chr(9827),
     "heart": chr(9829),
     "diamond": chr(9830),
-    "hidden": chr(9618),
 }
 
 BOX: StrDict = {
@@ -24,9 +25,10 @@ BOX: StrDict = {
     "top_right": chr(9559),
     "bottom_left": chr(9562),
     "bottom_right": chr(9565),
+    "hidden": chr(9618),
 }
 
-RANKS: set[Rank] = {2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"}
+RANKS: set[Rank] = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"}
 WIDTH: int = 7
 
 # State
@@ -73,15 +75,27 @@ def get_single_number(message: str, from_num: int, to_num: int) -> int:
             return number
 
 
+def build_deck() -> Deck:
+    deck = set()
+    for key in SUITS:
+        for rank in RANKS:
+            deck.add((rank, SUITS[key]))
+    return deck
+
+
+def get_cards(deck: Deck, num_of_cards: int) -> Deck:
+    return set(random.sample(tuple(deck), k=num_of_cards))
+
+
 def build_card(rank: Rank, suit: str) -> CardMap:
     """
     Returns a card ascii art from a provided rank and suit
     """
     return (
         BOX["top_left"] + BOX["double_line"] * WIDTH + BOX["top_right"],
-        BOX["double_pipe"] + f"{str(rank):<{WIDTH}}" + BOX["double_pipe"],
+        BOX["double_pipe"] + f"{rank:<{WIDTH}}" + BOX["double_pipe"],
         BOX["double_pipe"] + f"{suit:^{WIDTH}}" + BOX["double_pipe"],
-        BOX["double_pipe"] + f"{str(rank):>{WIDTH}}" + BOX["double_pipe"],
+        BOX["double_pipe"] + f"{rank:>{WIDTH}}" + BOX["double_pipe"],
         BOX["bottom_left"] + BOX["double_line"] * WIDTH + BOX["bottom_right"],
     )
 
@@ -92,18 +106,18 @@ def build_hidden_card() -> CardMap:
     """
     return (
         BOX["top_left"] + BOX["double_line"] * WIDTH + BOX["top_right"],
-        BOX["double_pipe"] + f"{SUITS["hidden"]:<{WIDTH}}" + BOX["double_pipe"],
-        BOX["double_pipe"] + f"{SUITS['hidden']:^{WIDTH}}" + BOX["double_pipe"],
-        BOX["double_pipe"] + f"{SUITS['hidden']:>{WIDTH}}" + BOX["double_pipe"],
+        BOX["double_pipe"] + f"{BOX["hidden"]:<{WIDTH}}" + BOX["double_pipe"],
+        BOX["double_pipe"] + f"{BOX['hidden']:^{WIDTH}}" + BOX["double_pipe"],
+        BOX["double_pipe"] + f"{BOX['hidden']:>{WIDTH}}" + BOX["double_pipe"],
         BOX["bottom_left"] + BOX["double_line"] * WIDTH + BOX["bottom_right"],
     )
 
 
-def render_card(card: Card) -> CardMap:
+def render_card(card: Card | None) -> CardMap:
     return build_hidden_card() if card is None else build_card(*card)
 
 
-def display_cards(cards: list[Card]) -> None:
+def display_cards(cards: Dealer) -> None:
     """
     Prints the cards passed as arguments side by side
     """
@@ -113,6 +127,19 @@ def display_cards(cards: list[Card]) -> None:
         for card in rendered_cards:
             print(card[row], end=" ")
         print()
+
+
+def count_card_value(card: Card) -> int:
+    rank, _ = card
+    if rank == "A":
+        return calculate_ace_value()
+    elif rank in {"J", "Q", "K"}:
+        return 10
+    return int(rank)
+
+
+def calculate_ace_value() -> int:
+    raise NotImplementedError("a = 11 if total + 11 < 21 else 1")
 
 
 def check_win() -> bool:
@@ -163,7 +190,10 @@ def run_app() -> None:
         balance,
     )
     print(f"Bet: {bet}")
-    display_cards([("K", SUITS["heart"]), None])
+    deck: Deck = build_deck()
+    hand: Deck = get_cards(deck, 5)
+    deck -= hand
+    display_cards(list(hand))
 
 
 # Driver
