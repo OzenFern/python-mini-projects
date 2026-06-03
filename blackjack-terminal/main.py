@@ -3,12 +3,11 @@ from ascii_art import logo
 
 # Typing Hints
 StrDict = dict[str, str]
-Rank = str
 State = dict[str, int]
 CardMap = tuple[str, str, str, str, str]
-Card = tuple[Rank, str]
+Card = tuple[str, str]
 Deck = set[Card]
-Dealer = list[Card | None]
+Hand = list[Card]
 
 # Constants
 SUITS: StrDict = {
@@ -28,12 +27,17 @@ BOX: StrDict = {
     "hidden": chr(9618),
 }
 
-RANKS: set[Rank] = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"}
+RANKS: set[str] = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"}
 WIDTH: int = 7
+NULL_CARD: Card = ("N", "N")
 
 # State
 balance: int = 5000
 deck: Deck = set()
+player_cards: Hand = []
+# player_points = 0
+dealer_cards: Hand = []
+# dealer_points = 0
 
 
 # Function Definition
@@ -92,17 +96,35 @@ def build_deck() -> Deck:
     return deck
 
 
-def get_cards(num_of_cards: int) -> Deck:
+def get_cards(num_of_cards: int) -> Hand:
     """
     Get a random number of cards from the deck as specified by the argument
     """
     global deck
-    hand: Deck = set(random.sample(tuple(deck), k=num_of_cards))
-    deck -= hand
+    if num_of_cards > len(deck):
+        rebuild_deck()
+    hand: Hand = random.sample(tuple(deck), k=num_of_cards)
+    update_deck(hand)
     return hand
 
 
-def build_card(rank: Rank, suit: str) -> CardMap:
+def update_deck(hand: Hand) -> None:
+    """
+    Updates the deck by removing the dealt cards
+    """
+    global deck
+    deck.difference_update(hand)
+
+
+def rebuild_deck() -> None:
+    """
+    Rebuilds a new deck when the current deck does not have sufficient cards
+    """
+    global deck
+    deck = build_deck().difference(player_cards, dealer_cards)
+
+
+def build_card(rank: str, suit: str) -> CardMap:
     """
     Returns a card ascii art from a provided rank and suit
     """
@@ -128,11 +150,11 @@ def build_hidden_card() -> CardMap:
     )
 
 
-def render_card(card: Card | None) -> CardMap:
-    return build_hidden_card() if card is None else build_card(*card)
+def render_card(card: Card) -> CardMap:
+    return build_hidden_card() if card == NULL_CARD else build_card(*card)
 
 
-def display_cards(cards: Dealer) -> None:
+def display_cards(cards: Hand) -> None:
     """
     Prints the cards passed as arguments side by side
     """
@@ -144,36 +166,65 @@ def display_cards(cards: Dealer) -> None:
         print()
 
 
-def calculate_card_value(card: Card) -> int:
+def calclate_total_points(person: str, cards: Hand) -> int:
     """
-    Calculate the value of cards
+    Calculates the total value of a Blackjack hand.
+    Aces are automatically worth 1 or 11.
     """
-    rank, _ = card
-    if rank == "A":
-        return calculate_ace_value()
-    elif rank in {"J", "Q", "K"}:
-        return 10
-    return int(rank)
+    total = 0
+    aces = 0
+
+    for rank, _ in cards:
+        if rank == "A":
+            total += 11
+            aces += 1
+        if rank in {"J", "Q", "K"}:
+            total += 10
+        else:
+            total += int(rank)
+
+    while total > 21 and aces > 0:
+        total -= 10
+        aces -= 1
+
+    display_points(person, total)
+    return total
 
 
-def calculate_ace_value() -> int:
-    raise NotImplementedError("a = 11 if total + 11 < 21 else 1")
+def display_points(person: str, total) -> None:
+    """
+    Prints the points with the name of the person
+    """
+    print(f"{person}: {total}")
 
 
 def play_round():
     """
     Show dealer's and player's cards and calculate points for both of them
     """
-    raise NotImplementedError("Implement calcuate_ace_value")
+    dealer_cards = get_cards(1)
+    dealer_points = calclate_total_points("Dealer", dealer_cards)
+    display_cards(dealer_cards + [NULL_CARD])
+    player_cards = get_cards(2)
+    player_points = calclate_total_points("Player", player_cards)
+    display_cards(player_cards)
 
 
-def check_win() -> bool:
+def check_win(dealer_points: int, player_points: int) -> bool | None:
+    """
+    Returns true if player won the round, or None to indicate draw
+    """
     raise NotImplementedError("Return true if player won the round")
 
 
 def update_balance(bet: int) -> None:
+    """
+    Update the balance based upon the result of the round
+    """
     global balance
-    if check_win():
+    if check_win() is None:
+        return
+    elif check_win():
         balance += bet
     else:
         balance -= bet
@@ -214,9 +265,8 @@ def run_app() -> None:
         1,
         balance,
     )
-    print(f"Bet: {bet}")
-    hand: Deck = get_cards(5)
-    display_cards(list(hand))
+    print(f"Bet: {bet}\n")
+    play_round()
 
 
 # Driver
