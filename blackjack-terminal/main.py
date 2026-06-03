@@ -33,6 +33,7 @@ WIDTH: int = 7
 
 # State
 balance: int = 5000
+deck: Deck = set()
 
 
 # Function Definition
@@ -51,6 +52,9 @@ def get_input(prompt: str) -> str:
 
 
 def convert_to_int(number: str) -> int | None:
+    """
+    Converts a given into integer, returns None if the operation fails
+    """
     try:
         return int(number)
     except ValueError:
@@ -65,6 +69,9 @@ def num_is_between(num_to_check: int, from_num: int, to_num: int) -> bool:
 
 
 def get_single_number(message: str, from_num: int, to_num: int) -> int:
+    """
+    Returns a single interger number from the specified range
+    """
     while True:
         number = convert_to_int(get_input(message))
         if number is None:
@@ -76,15 +83,23 @@ def get_single_number(message: str, from_num: int, to_num: int) -> int:
 
 
 def build_deck() -> Deck:
-    deck = set()
+    """
+    Builds a deck using SUITS & RANKS
+    """
     for key in SUITS:
         for rank in RANKS:
             deck.add((rank, SUITS[key]))
     return deck
 
 
-def get_cards(deck: Deck, num_of_cards: int) -> Deck:
-    return set(random.sample(tuple(deck), k=num_of_cards))
+def get_cards(num_of_cards: int) -> Deck:
+    """
+    Get a random number of cards from the deck as specified by the argument
+    """
+    global deck
+    hand: Deck = set(random.sample(tuple(deck), k=num_of_cards))
+    deck -= hand
+    return hand
 
 
 def build_card(rank: Rank, suit: str) -> CardMap:
@@ -129,7 +144,10 @@ def display_cards(cards: Dealer) -> None:
         print()
 
 
-def count_card_value(card: Card) -> int:
+def calculate_card_value(card: Card) -> int:
+    """
+    Calculate the value of cards
+    """
     rank, _ = card
     if rank == "A":
         return calculate_ace_value()
@@ -140,6 +158,13 @@ def count_card_value(card: Card) -> int:
 
 def calculate_ace_value() -> int:
     raise NotImplementedError("a = 11 if total + 11 < 21 else 1")
+
+
+def play_round():
+    """
+    Show dealer's and player's cards and calculate points for both of them
+    """
+    raise NotImplementedError("Implement calcuate_ace_value")
 
 
 def check_win() -> bool:
@@ -190,9 +215,7 @@ def run_app() -> None:
         balance,
     )
     print(f"Bet: {bet}")
-    deck: Deck = build_deck()
-    hand: Deck = get_cards(deck, 5)
-    deck -= hand
+    hand: Deck = get_cards(5)
     display_cards(list(hand))
 
 
