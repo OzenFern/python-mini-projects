@@ -3,15 +3,21 @@ from ascii_art import logo
 
 # Typing Hints
 StrDict = dict[str, str]
-Ranks = str | int
+Rank = str | int
 State = dict[str, int]
+CardMap = tuple[str, str, str, str, str]
+Card = tuple[Rank, str] | None
 
 # Constants
-UNICODE: StrDict = {
+SUITS: StrDict = {
     "spade": chr(9824),
     "club": chr(9827),
     "heart": chr(9829),
     "diamond": chr(9830),
+    "hidden": chr(9618),
+}
+
+BOX: StrDict = {
     "double_line": chr(9552),
     "double_pipe": chr(9553),
     "top_left": chr(9556),
@@ -20,10 +26,8 @@ UNICODE: StrDict = {
     "bottom_right": chr(9565),
 }
 
-
-CARD_CONFIG: State = {"width": 3, "height": 3}
-
-RANKS: set[Ranks] = {2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"}
+RANKS: set[Rank] = {2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"}
+WIDTH: int = 7
 
 # State
 balance: int = 5000
@@ -69,21 +73,69 @@ def get_single_number(message: str, from_num: int, to_num: int) -> int:
             return number
 
 
-def build_card(rank: Ranks, suit: str) -> str:
+def build_card(rank: Rank, suit: str) -> CardMap:
     """
-    Builds a card ascii art from a provided rank and suit
+    Returns a card ascii art from a provided rank and suit
     """
-    raise NotImplementedError(
-        "Implement a get_card() to get parameters for this function"
+    return (
+        BOX["top_left"] + BOX["double_line"] * WIDTH + BOX["top_right"],
+        BOX["double_pipe"] + f"{str(rank):<{WIDTH}}" + BOX["double_pipe"],
+        BOX["double_pipe"] + f"{suit:^{WIDTH}}" + BOX["double_pipe"],
+        BOX["double_pipe"] + f"{str(rank):>{WIDTH}}" + BOX["double_pipe"],
+        BOX["bottom_left"] + BOX["double_line"] * WIDTH + BOX["bottom_right"],
     )
 
 
-def check_balance() -> bool:
+def build_hidden_card() -> CardMap:
+    """
+    Returns a hiddden card ascii art
+    """
+    return (
+        BOX["top_left"] + BOX["double_line"] * WIDTH + BOX["top_right"],
+        BOX["double_pipe"] + f"{SUITS["hidden"]:<{WIDTH}}" + BOX["double_pipe"],
+        BOX["double_pipe"] + f"{SUITS['hidden']:^{WIDTH}}" + BOX["double_pipe"],
+        BOX["double_pipe"] + f"{SUITS['hidden']:>{WIDTH}}" + BOX["double_pipe"],
+        BOX["bottom_left"] + BOX["double_line"] * WIDTH + BOX["bottom_right"],
+    )
+
+
+def render_card(card: Card) -> CardMap:
+    return build_hidden_card() if card is None else build_card(*card)
+
+
+def display_cards(cards: list[Card]) -> None:
+    """
+    Prints the cards passed as arguments side by side
+    """
+    rendered_cards = [render_card(card) for card in cards]
+
+    for row in range(len(rendered_cards[0])):
+        for card in rendered_cards:
+            print(card[row], end=" ")
+        print()
+
+
+def check_win() -> bool:
+    raise NotImplementedError("Return true if player won the round")
+
+
+def update_balance(bet: int) -> None:
     global balance
+    if check_win():
+        balance += bet
+    else:
+        balance -= bet
 
-    raise NotImplementedError(
-        "Add docstrings, When balance is 0, print, you're broke annd exit game"
-    )
+
+def check_balance() -> None:
+    """
+    This function is responisble for checking balance <= zero.
+    If the condition is met then it exits the game
+    """
+    global balance
+    if balance <= 0:
+        print_message("You're out of balance!")
+        exit_game()
 
 
 def exit_game() -> None:
@@ -95,23 +147,28 @@ def exit_game() -> None:
         print_message("Thanks for playing! Catch you later :D")
 
 
-def run_app():
+def run_app() -> None:
+    """
+    Runs the blackgame game
+    """
     global balance
 
     print(logo)
     print("Welcome to Blackjack!")
     print_message("You can press 'ctrl + c' anytime to quit...")
     print(f"Money: ${balance:,}")
-    bet = get_single_number(
+    bet: int = get_single_number(
         f"How much do you want to bet? (1 - {balance:,})",
         1,
         balance,
     )
     print(f"Bet: {bet}")
+    display_cards([("K", SUITS["heart"]), None])
 
 
 # Driver
 try:
+    # while True:
     run_app()
 except KeyboardInterrupt:
     print_message("You've pressed ctrl + C, exiting...")
