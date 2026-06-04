@@ -1,4 +1,4 @@
-import random
+from random import shuffle
 from ascii_art import logo
 
 # Typing Hints
@@ -6,8 +6,8 @@ StrDict = dict[str, str]
 State = dict[str, int]
 CardMap = tuple[str, str, str, str, str]
 Card = tuple[str, str]
-Deck = set[Card]
-Hand = list[Card]
+Deck = Hand = list[Card]
+
 
 # Constants
 SUITS: StrDict = {
@@ -27,17 +27,28 @@ BOX: StrDict = {
     "hidden": chr(9618),
 }
 
-RANKS: set[str] = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"}
+RANKS: tuple[str, ...] = (
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "J",
+    "Q",
+    "K",
+    "A",
+)
 WIDTH: int = 7
 NULL_CARD: Card = ("N", "N")
+RESHUFFLE_AT: int = 15
 
 # State
 balance: int = 5000
-deck: Deck = set()
-player_cards: Hand = []
-# player_points = 0
-dealer_cards: Hand = []
-# dealer_points = 0
+deck: Deck = []
 
 
 # Function Definition
@@ -92,36 +103,8 @@ def build_deck() -> Deck:
     """
     for key in SUITS:
         for rank in RANKS:
-            deck.add((rank, SUITS[key]))
+            deck.append((rank, SUITS[key]))
     return deck
-
-
-def get_cards(num_of_cards: int) -> Hand:
-    """
-    Get a random number of cards from the deck as specified by the argument
-    """
-    global deck
-    if num_of_cards > len(deck):
-        rebuild_deck()
-    hand: Hand = random.sample(tuple(deck), k=num_of_cards)
-    update_deck(hand)
-    return hand
-
-
-def update_deck(hand: Hand) -> None:
-    """
-    Updates the deck by removing the dealt cards
-    """
-    global deck
-    deck.difference_update(hand)
-
-
-def rebuild_deck() -> None:
-    """
-    Rebuilds a new deck when the current deck does not have sufficient cards
-    """
-    global deck
-    deck = build_deck().difference(player_cards, dealer_cards)
 
 
 def build_card(rank: str, suit: str) -> CardMap:
@@ -166,7 +149,26 @@ def display_cards(cards: Hand) -> None:
         print()
 
 
-def calclate_total_points(person: str, cards: Hand) -> int:
+def shuffle_deck() -> None:
+    """
+    Shuffles the deck in place
+    """
+    shuffle(deck)
+
+
+def deal_cards(num_of_cards: int = 1) -> Hand:
+    """
+    Get the number of cards specified in the argument from the top of the deck,
+    when the cards go below a specified threshold the deck is rebuilt and shuffled
+    By default returns a single card from the top of the deck
+    """
+    if len(deck) < RESHUFFLE_AT:
+        build_deck()
+        shuffle_deck()
+    return [deck.pop() for _ in range(num_of_cards)]
+
+
+def calclate_total_points(hand: Hand) -> int:
     """
     Calculates the total value of a Blackjack hand.
     Aces are automatically worth 1 or 11.
@@ -174,57 +176,111 @@ def calclate_total_points(person: str, cards: Hand) -> int:
     total = 0
     aces = 0
 
-    for rank, _ in cards:
+    for rank, _ in hand:
         if rank == "A":
             total += 11
             aces += 1
-        if rank in {"J", "Q", "K"}:
+        elif rank in {"J", "Q", "K"}:
             total += 10
-        else:
+        elif rank.isdecimal():
             total += int(rank)
 
     while total > 21 and aces > 0:
         total -= 10
         aces -= 1
 
-    display_points(person, total)
     return total
 
 
-def display_points(person: str, total) -> None:
+def is_blackjack(hand: Hand) -> bool:
+    """
+    Checks whether blacjack is hit
+    """
+    return len(hand) == 2 and calclate_total_points(hand) == 21
+
+
+def is_bust(points: int) -> bool:
+    return points > 21
+
+
+def display_points(name: str, total: int) -> None:
     """
     Prints the points with the name of the person
     """
-    print(f"{person}: {total}")
+    print(f"{name}: {total}")
 
 
-def play_round():
+def display_hand(name: str, hand: Hand) -> None:
     """
-    Show dealer's and player's cards and calculate points for both of them
+    Prints the points and the name of the person along with their cards
     """
-    dealer_cards = get_cards(1)
-    dealer_points = calclate_total_points("Dealer", dealer_cards)
-    display_cards(dealer_cards + [NULL_CARD])
-    player_cards = get_cards(2)
-    player_points = calclate_total_points("Player", player_cards)
-    display_cards(player_cards)
+    display_points(name, calclate_total_points(hand))
+    display_cards(hand)
 
 
-def check_win(dealer_points: int, player_points: int) -> bool | None:
+def deal_opening_hands() -> tuple[Hand, Hand]:
     """
-    Returns true if player won the round, or None to indicate draw
+    Deal the opening hand to the dealer and player
     """
-    raise NotImplementedError("Return true if player won the round")
+    dealer_hand = deal_cards(1) + [NULL_CARD]
+    player_hand = deal_cards(2)
+
+    return dealer_hand, player_hand
 
 
-def update_balance(bet: int) -> None:
+def display_hands(dealer_hand: Hand, player_hand: Hand) -> None:
+    """
+    Show dealer's and player's cards and display points for both of them
+    """
+    # Display Dealer Hand
+    display_hand("Dealer", dealer_hand)
+
+    print()
+
+    # Display Player Hand
+    display_hand("Player", player_hand)
+
+
+def player_turn(hand: Hand) -> Hand:
+    """
+    Checks if hand is a blakcjack and then asks player
+    """
+    raise NotImplementedError("Fix other functions first")
+
+
+def determine_winner(dealer_hand: Hand, player_hand: Hand) -> str:
+    """
+    Returns the winner or 'push' in case of draw
+    """
+    dealer_points: int = calclate_total_points(dealer_hand)
+    player_points: int = calclate_total_points(player_hand)
+    player_blackjack = is_blackjack(player_hand)
+    dealer_blackjack = is_blackjack(dealer_hand)
+
+    if player_blackjack:
+        return "player"
+    elif dealer_blackjack:
+        return "dealer"
+    elif dealer_points == player_points:
+        return "push"
+    elif is_bust(player_points):
+        return "dealer"
+    elif is_bust(dealer_points):
+        return "player"
+    elif dealer_points == player_points:
+        return "push"
+    else:
+        return "dealer" if dealer_points > player_points else "player"
+
+
+def update_balance(bet: int, dealer_hand: Hand, player_hand: Hand) -> None:
     """
     Update the balance based upon the result of the round
     """
     global balance
-    if check_win() is None:
+    if determine_winner(dealer_hand, player_hand) == "Push":
         return
-    elif check_win():
+    elif determine_winner(dealer_hand, player_hand) == "Player":
         balance += bet
     else:
         balance -= bet
@@ -266,7 +322,10 @@ def run_app() -> None:
         balance,
     )
     print(f"Bet: {bet}\n")
-    play_round()
+    dealer_hand, player_hand = deal_opening_hands()
+    display_hands(dealer_hand, player_hand)
+    determine_winner(dealer_hand, player_hand)
+    player_hand = player_turn(player_hand)
 
 
 # Driver
