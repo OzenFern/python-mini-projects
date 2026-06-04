@@ -100,12 +100,9 @@ def get_single_number(message: str, from_num: int, to_num: int) -> int:
 
 def build_deck() -> Deck:
     """
-    Builds a deck using SUITS & RANKS
+    Retruns deck using SUITS & RANKS
     """
-    for key in SUITS:
-        for rank in RANKS:
-            deck.append((rank, SUITS[key]))
-    return deck
+    return [(rank, suit) for suit in SUITS.values() for rank in RANKS]
 
 
 def build_card(rank: str, suit: str) -> CardMap:
@@ -163,8 +160,9 @@ def deal_cards(num_of_cards: int = 1) -> Hand:
     when the cards go below a specified threshold the deck is rebuilt and shuffled
     By default returns a single card from the top of the deck
     """
+    global deck
     if len(deck) < RESHUFFLE_AT:
-        build_deck()
+        deck = build_deck()
         shuffle_deck()
     return [deck.pop() for _ in range(num_of_cards)]
 
@@ -223,10 +221,8 @@ def deal_opening_hands() -> tuple[Hand, Hand]:
     """
     Deal the opening hand to the dealer and player
     """
-    dealer_hand = deal_cards(1) + [NULL_CARD]
-    player_hand = deal_cards(2)
 
-    return dealer_hand, player_hand
+    return deal_cards(2), deal_cards(2)
 
 
 def display_hands(dealer_hand: Hand, player_hand: Hand) -> None:
@@ -270,7 +266,7 @@ def dealer_turn(hand: Hand) -> Hand:
     while True:
         points = calclate_total_points(hand)
         if points < 17:
-            hand.append(deal_cards())
+            hand.extend(deal_cards())
         else:
             return hand
 
@@ -289,23 +285,21 @@ def determine_winner(dealer_hand: Hand, player_hand: Hand) -> str:
     """
     dealer_points: int = calclate_total_points(dealer_hand)
     player_points: int = calclate_total_points(player_hand)
-    player_blackjack = is_blackjack(player_hand)
-    dealer_blackjack = is_blackjack(dealer_hand)
 
-    if player_blackjack:
-        return "player"
-    elif dealer_blackjack:
-        return "dealer"
-    elif dealer_points == player_points:
-        return "push"
-    elif is_bust(player_points):
-        return "dealer"
-    elif is_bust(dealer_points):
-        return "player"
-    elif dealer_points == player_points:
+    if dealer_points == player_points:
         return "push"
     else:
         return "dealer" if dealer_points > player_points else "player"
+
+
+def print_winner(result: str) -> None:
+    """
+    Prints the result on the terminal
+    """
+    if result == "push":
+        print_message("Push! It's a draw!")
+    else:
+        print_message(f"{result.capitalize()} wins!")
 
 
 def reset_bet() -> None:
@@ -318,7 +312,7 @@ def reset_bet() -> None:
 
 def get_bet() -> None:
     """
-    Gets the bet from the player
+    Gets the bet from the player and deducts it from the balance
     """
     global balance, bet
     bet += get_single_number(
@@ -326,6 +320,7 @@ def get_bet() -> None:
         1,
         balance,
     )
+    balance -= bet
     print(f"Bet: {bet}\n")
 
 
@@ -336,11 +331,17 @@ def update_balance(dealer_hand: Hand, player_hand: Hand) -> None:
     global balance, bet
     result = determine_winner(dealer_hand, player_hand)
     if result == "Push":
-        return
-    elif result == "Player":
         balance += bet
-    else:
-        balance -= bet
+    elif result == "Player":
+        balance += bet * 2
+
+
+def display_balance() -> None:
+    """
+    Displays the current balance to the user
+    """
+    global balance
+    print(f"Money: ${balance:,}")
 
 
 def check_balance() -> None:
@@ -367,21 +368,48 @@ def run_round() -> None:
     """
     Runs the blackgame game
     """
-    global balance
-    print(f"Money: ${balance:,}")
+    display_balance()
+
     reset_bet()
     get_bet()
+
     dealer_hand, player_hand = deal_opening_hands()
-    display_hands(dealer_hand, player_hand)
-    if determine_winner(dealer_hand, player_hand) == "dealer":
+
+    display_hands([dealer_hand[0], NULL_CARD], player_hand)
+
+    # Opening blackjacks
+    if is_blackjack(player_hand) or is_blackjack(dealer_hand):
+        winner = determine_winner(dealer_hand, player_hand)
+
+        print_message(f"Blackjack! {winner} wins!")
+        update_balance(dealer_hand, player_hand)
         return
+
+    # Player turn
     player_hand: Hand = player_turn(player_hand)
-    if determine_winner(dealer_hand, player_hand) == "dealer":
-        print_message("You lost...")
+    display_hands([dealer_hand[0], NULL_CARD], player_hand)
+
+    if is_bust(calclate_total_points(player_hand)):
+        print_message("Bust! Dealer wins.")
+        update_balance(dealer_hand, player_hand)
         return
+
+    # Dealer turn
     dealer_hand: Hand = dealer_turn(dealer_hand)
+
+    print("\nDealer reveals cards:\n")
+    display_hands(dealer_hand, player_hand)
+
+    if is_bust(calclate_total_points(dealer_hand)):
+        print_message("Dealer busts!")
+        update_balance(dealer_hand, player_hand)
+        return
+
     winner: str = determine_winner(dealer_hand, player_hand)
-    print_message(f"Winner is {winner}")
+
+    print_winner(winner)
+
+    update_balance(dealer_hand, player_hand)
 
 
 # Driver
@@ -391,6 +419,8 @@ try:
     print_message("You can press 'ctrl + c' anytime to quit...")
     while True:
         run_round()
+        display_balance()
+        input("Press 'ctrl + c' to exit or Enter to play the next round...")
 except KeyboardInterrupt:
     print_message("You've pressed ctrl + C, exiting...")
     exit_game()
