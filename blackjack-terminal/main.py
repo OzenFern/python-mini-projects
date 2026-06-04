@@ -47,8 +47,8 @@ NULL_CARD: Card = ("N", "N")
 RESHUFFLE_AT: int = 15
 
 # State
-balance: int = 5000
-bet: int = 0
+balance: float = 5000
+bet: float = 0
 deck: Deck = []
 
 
@@ -67,29 +67,29 @@ def get_input(prompt: str) -> str:
     return input(f"{prompt}\n> ").strip()
 
 
-def convert_to_int(number: str) -> int | None:
+def convert_to_float(number: str) -> float | None:
     """
-    Converts a given into integer, returns None if the operation fails
+    Converts a given string into float, returns None if the operation fails
     """
     try:
-        return int(number)
-    except ValueError:
+        return float(number)
+    except (ValueError, TypeError):
         return None
 
 
-def num_is_between(num_to_check: int, from_num: int, to_num: int) -> bool:
+def num_is_between(num_to_check: float, from_num: float, to_num: float) -> bool:
     """
     Returns True if the number is between the specified range
     """
     return from_num <= num_to_check <= to_num
 
 
-def get_single_number(message: str, from_num: int, to_num: int) -> int:
+def get_single_number(message: str, from_num: float, to_num: float) -> float:
     """
-    Returns a single interger number from the specified range
+    Returns a single float number from the specified range
     """
     while True:
-        number = convert_to_int(get_input(message))
+        number = convert_to_float(get_input(message))
         if number is None:
             print_message("Please enter a single number!")
         elif not num_is_between(number, from_num, to_num):
@@ -202,19 +202,11 @@ def is_bust(points: int) -> bool:
     return points > 21
 
 
-def display_points(name: str, total: int) -> None:
+def display_points(name: str, total: str) -> None:
     """
     Prints the points with the name of the person
     """
     print(f"{name}: {total}")
-
-
-def display_hand(name: str, hand: Hand) -> None:
-    """
-    Prints the points and the name of the person along with their cards
-    """
-    display_points(name, calclate_total_points(hand))
-    display_cards(hand)
 
 
 def deal_opening_hands() -> tuple[Hand, Hand]:
@@ -223,6 +215,15 @@ def deal_opening_hands() -> tuple[Hand, Hand]:
     """
 
     return deal_cards(2), deal_cards(2)
+
+
+def display_hand(name: str, hand: Hand) -> None:
+    """
+    Prints the points and the name of the person along with their cards
+    """
+    points = calclate_total_points(hand)
+    display_points(name, str(points) + " ??" if NULL_CARD in hand else "")
+    display_cards(hand)
 
 
 def display_hands(dealer_hand: Hand, player_hand: Hand) -> None:
@@ -243,19 +244,30 @@ def player_turn(hand: Hand) -> Hand:
     Checks if hand is a blakcjack and then asks player
     """
     global balance, bet
-    player_choices: list[str] = ["(H)it", "(S)tand"]
-    if len(hand) == 2:
-        player_choices.append("(D)ouble down")
 
     while True:
+        player_choices: list[str] = ["(H)it", "(S)tand"]
+        if len(hand) == 2:
+            player_choices.append("(D)ouble down")
+
         next_choice = get_input(" ".join(player_choices)).upper()
         if next_choice == "S":
             return hand
         elif next_choice == "H":
-            return hand + deal_cards()
+            hand.extend(deal_cards())
+
+            # Automatically end turn if they bust or hit 21
+            if calclate_total_points(hand) >= 21:
+                return hand
+
+            # Display cards to the player
+            display_hand("Player", hand)
+
         elif next_choice == "D" and len(hand) == 2:
-            bet *= 2
-            balance -= bet
+            balance -= bet  # Deduct the original bet amount
+            bet *= 2  # Double the existing bet
+            print_message("Doubling Down...")
+            input("Press Enter to continue...")
             return hand + deal_cards()
         elif next_choice == "D":
             print_message("Double down option is only available on the first turn")
@@ -321,13 +333,17 @@ def get_bet() -> None:
 def update_balance(dealer_hand: Hand, player_hand: Hand) -> None:
     """
     Update the balance based upon the result of the round
+    Includes 3:2 payout for player on Blackjack
     """
     global balance, bet
     result = determine_winner(dealer_hand, player_hand)
     if result == "push":
         balance += bet
     elif result == "player":
-        balance += bet * 2
+        if is_blackjack(player_hand):
+            balance += bet + bet * 1.5
+        else:
+            balance += bet * 2
 
 
 def display_balance() -> None:
@@ -375,7 +391,7 @@ def run_round() -> None:
     if is_blackjack(player_hand) or is_blackjack(dealer_hand):
         winner = determine_winner(dealer_hand, player_hand)
 
-        print_message(f"Blackjack! {winner} wins!")
+        print_message(f"Blackjack! {"Tie, Noone" if winner== "push" else winner} wins!")
         update_balance(dealer_hand, player_hand)
         return
 
