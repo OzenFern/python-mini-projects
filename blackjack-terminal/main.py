@@ -246,9 +246,9 @@ def player_turn(hand: Hand) -> Hand:
     """
     Checks if hand is a blakcjack and then asks player
     """
-    player_choices: list[str] = ["(H)it", "(S)tand", "(D)ouble down"]
-    if len(hand) != 2:
-        player_choices.remove("(D)ouble down")
+    player_choices: list[str] = ["(H)it", "(S)tand"]
+    if len(hand) == 2:
+        player_choices.append("(D)ouble down")
 
     while True:
         next_choice = get_input(" ".join(player_choices)).upper()
