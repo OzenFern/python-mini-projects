@@ -1,3 +1,4 @@
+import time
 from random import shuffle
 from ascii_art import logo
 
@@ -44,7 +45,8 @@ RANKS: tuple[str, ...] = (
 )
 WIDTH: int = 7
 NULL_CARD: Card = ("N", "N")
-RESHUFFLE_AT: int = 15
+SHOE_SIZE: int = 6  # Standard Casino Shoe
+RESHUFFLE_AT: int = int(SHOE_SIZE * 52 * 0.25)  # Reshuffle at 75% Deck Penetration
 
 # State
 balance: float = 5000
@@ -56,8 +58,19 @@ deck: Deck = []
 def clear_terminal() -> None:
     """
     Standard ANSI escape code to reset the terminal
+    Prints Balance and Bet
     """
     print("\033c", end="")
+
+
+def refresh_game_screen() -> None:
+    """
+    CLear the terminal
+    Prints Balance and Bet
+    """
+    clear_terminal()
+    display_balance()
+    print(f"Bet: ${bet:,g}\n")
 
 
 def print_message(message: str) -> None:
@@ -107,9 +120,9 @@ def get_single_number(message: str, from_num: float, to_num: float) -> float:
 
 def build_deck() -> Deck:
     """
-    Retruns deck using SUITS & RANKS
+    Returns a shoe using SUITS & RANKS
     """
-    return [(rank, suit) for suit in SUITS.values() for rank in RANKS]
+    return [(rank, suit) for suit in SUITS.values() for rank in RANKS] * SHOE_SIZE
 
 
 def build_card(rank: str, suit: str) -> CardMap:
@@ -158,6 +171,8 @@ def shuffle_deck() -> None:
     """
     Shuffles the deck in place
     """
+    print_message("Dealer is shuffling a new shoe...")
+    time.sleep(1.5)
     shuffle(deck)
 
 
@@ -171,6 +186,8 @@ def deal_cards(num_of_cards: int = 1) -> Hand:
     if len(deck) < RESHUFFLE_AT:
         deck = build_deck()
         shuffle_deck()
+        print_message("New shoe has been shuffled. Good Luck...!")
+
     return [deck.pop() for _ in range(num_of_cards)]
 
 
@@ -283,14 +300,19 @@ def player_turn(hand: Hand) -> Hand:
             print_message("Double down option is not available!")
 
 
-def dealer_turn(hand: Hand) -> Hand:
+def dealer_turn(hand: Hand, player_hand: Hand) -> Hand:
     """
     Hits while total is below 17
     """
     while True:
         points = calclate_total_points(hand)
         if points < 17:
+            time.sleep(2)  # Pause before drawing
             hand.extend(deal_cards())
+
+            # Clear screen and display the both hands
+            refresh_game_screen()
+            display_hands(hand, player_hand)
         else:
             return hand
 
@@ -389,17 +411,14 @@ def run_round() -> None:
     reset_bet()
     get_bet()
 
-    clear_terminal()
-
-    # Reprint current balance and bet
-    display_balance()
-    print(f"Bet: ${bet:,g}\n")
+    refresh_game_screen()
 
     dealer_hand, player_hand = deal_opening_hands()
     display_hands([dealer_hand[0], NULL_CARD], player_hand)
 
     # Opening blackjacks
     if is_blackjack(player_hand) or is_blackjack(dealer_hand):
+        display_hands(dealer_hand, player_hand)
         winner = determine_winner(dealer_hand, player_hand)
 
         if winner == "push":
@@ -424,9 +443,11 @@ def run_round() -> None:
         return
 
     # Dealer turn
-    dealer_hand: Hand = dealer_turn(dealer_hand)
-
-    print("\nDealer reveals cards:\n")
+    refresh_game_screen()
+    print_message("Dealer reveals his cards...")
+    dealer_hand: Hand = dealer_turn(dealer_hand, player_hand)
+    time.sleep(2)
+    refresh_game_screen()
     display_hands(dealer_hand, player_hand)
 
     if is_bust(calclate_total_points(dealer_hand)):
@@ -451,7 +472,7 @@ try:
         check_balance()
         run_round()
         input("Press 'ctrl + c' to exit or Enter to play the next round...")
-        clear_terminal()
+        refresh_game_screen()
 except KeyboardInterrupt:
     print_message("You've pressed ctrl + C, exiting...")
     exit_game()
