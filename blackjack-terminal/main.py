@@ -53,6 +53,13 @@ deck: Deck = []
 
 
 # Function Definition
+def clear_terminal() -> None:
+    """
+    Standard ANSI escape code to reset the terminal
+    """
+    print("\033c", end="")
+
+
 def print_message(message: str) -> None:
     """
     A customized print() to display a message to the terminal
@@ -247,7 +254,7 @@ def player_turn(hand: Hand) -> Hand:
 
     while True:
         player_choices: list[str] = ["(H)it", "(S)tand"]
-        if len(hand) == 2:
+        if len(hand) == 2 and bet < balance:
             player_choices.append("(D)ouble down")
 
         next_choice = get_input(" ".join(player_choices)).upper()
@@ -264,16 +271,13 @@ def player_turn(hand: Hand) -> Hand:
             display_hand("Player", hand)
 
         elif next_choice == "D" and len(hand) == 2:
-            if bet > balance:
-                print_message("You don't have enough money to double down!")
-            else:
-                balance -= bet  # Deduct the original bet amount
-                bet *= 2  # Double the existing bet
-                print_message("Doubling Down...")
-                input("Press Enter to continue...")
-                return hand + deal_cards()
+            balance -= bet  # Deduct the original bet amount
+            bet *= 2  # Double the existing bet
+            print_message("Doubling Down...")
+            input("Press Enter to continue...")
+            return hand + deal_cards()
         elif next_choice == "D":
-            print_message("Double down option is only available on the first turn")
+            print_message("Double down option is not available!")
 
 
 def dealer_turn(hand: Hand) -> Hand:
@@ -330,7 +334,6 @@ def get_bet() -> None:
         balance,
     )
     balance -= bet
-    print(f"Bet: {bet:,g}\n")
 
 
 def update_balance(winner: str) -> None:
@@ -383,8 +386,13 @@ def run_round() -> None:
     reset_bet()
     get_bet()
 
-    dealer_hand, player_hand = deal_opening_hands()
+    clear_terminal()
 
+    # Reprint current balance and bet
+    display_balance()
+    print(f"Bet: ${bet:,g}\n")
+
+    dealer_hand, player_hand = deal_opening_hands()
     display_hands([dealer_hand[0], NULL_CARD], player_hand)
 
     # Opening blackjacks
@@ -432,14 +440,15 @@ def run_round() -> None:
 
 # Driver
 try:
+    clear_terminal()
     print(logo)
     print("Welcome to Blackjack!")
     print_message("You can press 'ctrl + c' anytime to quit...")
     while True:
         check_balance()
         run_round()
-        display_balance()
         input("Press 'ctrl + c' to exit or Enter to play the next round...")
+        clear_terminal()
 except KeyboardInterrupt:
     print_message("You've pressed ctrl + C, exiting...")
     exit_game()
