@@ -480,6 +480,7 @@ try:
     while True:
         check_balance()
         run_round()
+        display_balance()
         input("Press 'ctrl + c' to exit or Enter to play the next round...")
         refresh_game_screen()
 except KeyboardInterrupt:
