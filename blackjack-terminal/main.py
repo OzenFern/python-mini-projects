@@ -222,7 +222,7 @@ def display_hand(name: str, hand: Hand) -> None:
     Prints the points and the name of the person along with their cards
     """
     points = calclate_total_points(hand)
-    display_points(name, str(points) + " ??" if NULL_CARD in hand else "")
+    display_points(name, str(points) + " ??" if NULL_CARD in hand else str(points))
     display_cards(hand)
 
 
@@ -264,11 +264,14 @@ def player_turn(hand: Hand) -> Hand:
             display_hand("Player", hand)
 
         elif next_choice == "D" and len(hand) == 2:
-            balance -= bet  # Deduct the original bet amount
-            bet *= 2  # Double the existing bet
-            print_message("Doubling Down...")
-            input("Press Enter to continue...")
-            return hand + deal_cards()
+            if bet > balance:
+                print_message("You don't have enough money to double down!")
+            else:
+                balance -= bet  # Deduct the original bet amount
+                bet *= 2  # Double the existing bet
+                print_message("Doubling Down...")
+                input("Press Enter to continue...")
+                return hand + deal_cards()
         elif next_choice == "D":
             print_message("Double down option is only available on the first turn")
 
@@ -327,23 +330,18 @@ def get_bet() -> None:
         balance,
     )
     balance -= bet
-    print(f"Bet: {bet}\n")
+    print(f"Bet: {bet:,g}\n")
 
 
-def update_balance(dealer_hand: Hand, player_hand: Hand) -> None:
+def update_balance(winner: str) -> None:
     """
     Update the balance based upon the result of the round
-    Includes 3:2 payout for player on Blackjack
     """
     global balance, bet
-    result = determine_winner(dealer_hand, player_hand)
-    if result == "push":
+    if winner == "push":
         balance += bet
-    elif result == "player":
-        if is_blackjack(player_hand):
-            balance += bet + bet * 1.5
-        else:
-            balance += bet * 2
+    elif winner == "player":
+        balance += bet * 2
 
 
 def display_balance() -> None:
@@ -351,7 +349,7 @@ def display_balance() -> None:
     Displays the current balance to the user
     """
     global balance
-    print(f"Money: ${balance:,}")
+    print(f"Money: ${balance:,g}")
 
 
 def check_balance() -> None:
@@ -378,6 +376,8 @@ def run_round() -> None:
     """
     Runs the blackgame game
     """
+    global balance, bet
+
     display_balance()
 
     reset_bet()
@@ -392,7 +392,9 @@ def run_round() -> None:
         winner = determine_winner(dealer_hand, player_hand)
 
         print_message(f"Blackjack! {"Tie, Noone" if winner== "push" else winner} wins!")
-        update_balance(dealer_hand, player_hand)
+        if is_blackjack(player_hand):
+            balance += bet * 1.5  # 3:2 payout on a blackjack
+        update_balance(winner)
         return
 
     # Player turn
@@ -401,7 +403,7 @@ def run_round() -> None:
 
     if is_bust(calclate_total_points(player_hand)):
         print_message("Bust! Dealer wins.")
-        update_balance(dealer_hand, player_hand)
+        update_balance("dealer")
         return
 
     # Dealer turn
@@ -412,14 +414,14 @@ def run_round() -> None:
 
     if is_bust(calclate_total_points(dealer_hand)):
         print_message("Dealer busts!")
-        update_balance(dealer_hand, player_hand)
+        update_balance("player")
         return
 
     winner: str = determine_winner(dealer_hand, player_hand)
 
     print_winner(winner)
 
-    update_balance(dealer_hand, player_hand)
+    update_balance(winner)
 
 
 # Driver
