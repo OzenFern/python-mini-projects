@@ -254,10 +254,10 @@ def player_turn(hand: Hand) -> Hand:
 
     while True:
         player_choices: list[str] = ["(H)it", "(S)tand"]
-        if len(hand) == 2 and bet < balance:
+        if len(hand) == 2 and bet <= balance:
             player_choices.append("(D)ouble down")
 
-        next_choice = get_input(" ".join(player_choices)).upper()
+        next_choice: str = get_input(" ".join(player_choices)).upper()
         if next_choice == "S":
             return hand
         elif next_choice == "H":
@@ -271,11 +271,14 @@ def player_turn(hand: Hand) -> Hand:
             display_hand("Player", hand)
 
         elif next_choice == "D" and len(hand) == 2:
-            balance -= bet  # Deduct the original bet amount
-            bet *= 2  # Double the existing bet
-            print_message("Doubling Down...")
-            input("Press Enter to continue...")
-            return hand + deal_cards()
+            if bet >= balance:
+                print_message("You don't have enough money to double down!")
+            else:
+                balance -= bet  # Deduct the original bet amount
+                bet *= 2  # Double the existing bet
+                print_message("Doubling Down...")
+                input("Press Enter to continue...")
+                return hand + deal_cards()
         elif next_choice == "D":
             print_message("Double down option is not available!")
 
