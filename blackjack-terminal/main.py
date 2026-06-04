@@ -330,9 +330,9 @@ def update_balance(dealer_hand: Hand, player_hand: Hand) -> None:
     """
     global balance, bet
     result = determine_winner(dealer_hand, player_hand)
-    if result == "Push":
+    if result == "push":
         balance += bet
-    elif result == "Player":
+    elif result == "player":
         balance += bet * 2
 
 
