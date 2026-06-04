@@ -391,10 +391,16 @@ def run_round() -> None:
     if is_blackjack(player_hand) or is_blackjack(dealer_hand):
         winner = determine_winner(dealer_hand, player_hand)
 
-        print_message(f"Blackjack! {"Tie, Noone" if winner== "push" else winner} wins!")
-        if is_blackjack(player_hand):
-            balance += bet * 1.5  # 3:2 payout on a blackjack
-        update_balance(winner)
+        if winner == "push":
+            print_message("Blackjack! But it's a tie, No one wins!")
+            balance += bet  # Return the original bet
+        elif winner == "player":
+            print_message("Blackjack! Player wins!")
+            balance += bet * 2.5  # Bet back (1.0) + Profit (1.5)
+        else:
+            print_message("Dealer has Blackjack! Dealer wins!")
+            # Dealer wins, bet is already deducted, no operations carried on balance
+
         return
 
     # Player turn
@@ -430,6 +436,7 @@ try:
     print("Welcome to Blackjack!")
     print_message("You can press 'ctrl + c' anytime to quit...")
     while True:
+        check_balance()
         run_round()
         display_balance()
         input("Press 'ctrl + c' to exit or Enter to play the next round...")
