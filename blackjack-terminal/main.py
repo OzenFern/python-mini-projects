@@ -325,7 +325,7 @@ def get_bet() -> None:
     """
     global balance, bet
     bet += get_single_number(
-        f"How much do you want to bet? (1 - {balance:,})",
+        f"How much do you want to bet? (1 - {balance:,g})",
         1,
         balance,
     )
