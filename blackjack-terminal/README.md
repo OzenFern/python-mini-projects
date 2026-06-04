@@ -30,16 +30,16 @@ A terminal-based Blackjack game built in Python featuring ASCII card rendering, 
 ```text
 Dealer: 10 ??
 ╔═══════╗ ╔═══════╗
-║10     ║ ║▓▓▓▓▓▓▓║
-║   ♠   ║ ║▓▓▓▓▓▓▓║
-║     10║ ║▓▓▓▓▓▓▓║
+║10     ║ ║▒      ║
+║   ♠   ║ ║   ▒   ║
+║     10║ ║      ▒║
 ╚═══════╝ ╚═══════╝
 
-Player: 18
+Player: 16
 ╔═══════╗ ╔═══════╗
-║A      ║ ║7      ║
-║   ♥   ║ ║   ♣   ║
-║      A║ ║      7║
+║K      ║ ║6      ║
+║   ♦   ║ ║   ♠   ║
+║      K║ ║      6║
 ╚═══════╝ ╚═══════╝
 ```
 
@@ -49,11 +49,11 @@ Player: 18
 
 ### Card Values
 
-| Card | Value |
-|--------|--------|
-| 2-10 | Face Value |
-| J, Q, K | 10 |
-| A | 1 or 11 |
+| Card    | Value      |
+| ------- | ---------- |
+| 2-10    | Face Value |
+| J, Q, K | 10         |
+| A       | 1 or 11    |
 
 ### Blackjack
 
