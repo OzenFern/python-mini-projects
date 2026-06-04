@@ -307,14 +307,23 @@ def dealer_turn(hand: Hand, player_hand: Hand) -> Hand:
     while True:
         points = calclate_total_points(hand)
         if points < 17:
+            _display_hands(hand, player_hand)
             time.sleep(2)  # Pause before drawing
             hand.extend(deal_cards())
 
             # Clear screen and display the both hands
-            refresh_game_screen()
-            display_hands(hand, player_hand)
+            _display_hands(hand, player_hand)
         else:
             return hand
+
+
+def _display_hands(hand: Hand, player_hand: Hand) -> None:
+    """
+    Helper function to display hands for dealer's turn
+    """
+    refresh_game_screen()
+    display_hands(hand, player_hand)
+    print_message("Revealing Cards...")
 
 
 def determine_winner(dealer_hand: Hand, player_hand: Hand) -> str:
