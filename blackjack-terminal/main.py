@@ -48,6 +48,7 @@ RESHUFFLE_AT: int = 15
 
 # State
 balance: int = 5000
+bet: int = 0
 deck: Deck = []
 
 
@@ -245,7 +246,41 @@ def player_turn(hand: Hand) -> Hand:
     """
     Checks if hand is a blakcjack and then asks player
     """
-    raise NotImplementedError("Fix other functions first")
+    player_choices: list[str] = ["(H)it", "(S)tand", "(D)ouble down"]
+    if len(hand) != 2:
+        player_choices.remove("(D)ouble down")
+
+    while True:
+        next_choice = get_input(" ".join(player_choices)).upper()
+        if next_choice == "S":
+            return hand
+        elif next_choice == "H":
+            return hand + deal_cards()
+        elif next_choice == "D" and len(hand) == 2:
+            get_bet()
+            return hand + deal_cards()
+        elif next_choice == "D":
+            print_message("Double down option is only available on the first turn")
+
+
+def dealer_turn(hand: Hand) -> Hand:
+    """
+    Hits while total is below 17
+    """
+    while True:
+        points = calclate_total_points(hand)
+        if points < 17:
+            hand.append(deal_cards())
+        else:
+            return hand
+
+
+def double_down() -> None:
+    """
+    Gives player option to increase their bet.
+    But player must hit exactly one more time before standing
+    """
+    raise NotImplementedError("This function doesn't seem necessary")
 
 
 def determine_winner(dealer_hand: Hand, player_hand: Hand) -> str:
@@ -273,14 +308,36 @@ def determine_winner(dealer_hand: Hand, player_hand: Hand) -> str:
         return "dealer" if dealer_points > player_points else "player"
 
 
-def update_balance(bet: int, dealer_hand: Hand, player_hand: Hand) -> None:
+def reset_bet() -> None:
+    """
+    Resets the bet to zero
+    """
+    global bet
+    bet = 0
+
+
+def get_bet() -> None:
+    """
+    Gets the bet from the player
+    """
+    global balance, bet
+    bet += get_single_number(
+        f"How much do you want to bet? (1 - {balance:,})",
+        1,
+        balance,
+    )
+    print(f"Bet: {bet}\n")
+
+
+def update_balance(dealer_hand: Hand, player_hand: Hand) -> None:
     """
     Update the balance based upon the result of the round
     """
-    global balance
-    if determine_winner(dealer_hand, player_hand) == "Push":
+    global balance, bet
+    result = determine_winner(dealer_hand, player_hand)
+    if result == "Push":
         return
-    elif determine_winner(dealer_hand, player_hand) == "Player":
+    elif result == "Player":
         balance += bet
     else:
         balance -= bet
@@ -306,32 +363,34 @@ def exit_game() -> None:
         print_message("Thanks for playing! Catch you later :D")
 
 
-def run_app() -> None:
+def run_round() -> None:
     """
     Runs the blackgame game
     """
     global balance
-
-    print(logo)
-    print("Welcome to Blackjack!")
-    print_message("You can press 'ctrl + c' anytime to quit...")
     print(f"Money: ${balance:,}")
-    bet: int = get_single_number(
-        f"How much do you want to bet? (1 - {balance:,})",
-        1,
-        balance,
-    )
-    print(f"Bet: {bet}\n")
+    reset_bet()
+    get_bet()
     dealer_hand, player_hand = deal_opening_hands()
     display_hands(dealer_hand, player_hand)
-    determine_winner(dealer_hand, player_hand)
-    player_hand = player_turn(player_hand)
+    if determine_winner(dealer_hand, player_hand) == "dealer":
+        return
+    player_hand: Hand = player_turn(player_hand)
+    if determine_winner(dealer_hand, player_hand) == "dealer":
+        print_message("You lost...")
+        return
+    dealer_hand: Hand = dealer_turn(dealer_hand)
+    winner: str = determine_winner(dealer_hand, player_hand)
+    print_message(f"Winner is {winner}")
 
 
 # Driver
 try:
-    # while True:
-    run_app()
+    print(logo)
+    print("Welcome to Blackjack!")
+    print_message("You can press 'ctrl + c' anytime to quit...")
+    while True:
+        run_round()
 except KeyboardInterrupt:
     print_message("You've pressed ctrl + C, exiting...")
     exit_game()
