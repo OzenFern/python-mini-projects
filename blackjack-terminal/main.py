@@ -242,6 +242,7 @@ def player_turn(hand: Hand) -> Hand:
     """
     Checks if hand is a blakcjack and then asks player
     """
+    global balance, bet
     player_choices: list[str] = ["(H)it", "(S)tand"]
     if len(hand) == 2:
         player_choices.append("(D)ouble down")
@@ -253,7 +254,8 @@ def player_turn(hand: Hand) -> Hand:
         elif next_choice == "H":
             return hand + deal_cards()
         elif next_choice == "D" and len(hand) == 2:
-            get_bet()
+            bet *= 2
+            balance -= bet
             return hand + deal_cards()
         elif next_choice == "D":
             print_message("Double down option is only available on the first turn")
@@ -269,14 +271,6 @@ def dealer_turn(hand: Hand) -> Hand:
             hand.extend(deal_cards())
         else:
             return hand
-
-
-def double_down() -> None:
-    """
-    Gives player option to increase their bet.
-    But player must hit exactly one more time before standing
-    """
-    raise NotImplementedError("This function doesn't seem necessary")
 
 
 def determine_winner(dealer_hand: Hand, player_hand: Hand) -> str:
